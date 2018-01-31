@@ -6,4 +6,162 @@
     android:layout_height="match_parent"
     tools:context="com.group5project.mobilecomputing.group5.HomeActivity">
 
+    <LinearLayout
+        android:id="@+id/ll1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+        <!-- Part of this referred from https://stackoverflow.com/questions/19407909/how-to-size-two-textview-side-by-side-and-use-50-width-of-screen/19407981 -->
+        <!--
+        <LinearLayout
+            android:id="@+id/ll2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:textAlignment="center"
+            >
+            <TextView
+            android:id="@+id/tv1"
+            android:layout_width="0dp"
+            tools:ignore="Suspicious0dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:background="@android:color/darker_gray" />
+            <TextView
+            android:id="@+id/tv2"
+            android:layout_width="0dp"
+            tools:ignore="Suspicious0dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="20dp"
+            android:layout_weight="1"
+            android:background="@android:color/darker_gray" />
+        </LinearLayout>         -->
+        <LinearLayout
+            android:id="@+id/ll8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="2"
+            android:layout_marginTop="10dp"
+            >
+        <com.jjoe64.graphview.GraphView
+            android:layout_width="match_parent"
+            android:layout_height="250dp" />
+            
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/ll3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <EditText
+                android:id="@+id/editText1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+
+                android:text=""
+                android:hint="Patient ID"
+                android:inputType="number"
+                />
+
+            <EditText
+                android:id="@+id/editText2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:hint="Age"
+                android:inputType="number"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <EditText
+            android:id="@+id/editText3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text=""
+            android:hint="Patient Name"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:id="@+id/ll6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="3"
+                    >
+                <TextView
+                    android:id="@+id/tv3"
+                    android:layout_width="0dp"
+                    tools:ignore="Suspicious0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Sex:"
+                    android:layout_weight="1"
+                    android:textSize="20dp"
+                    android:background="@android:color/darker_gray" />
+                <RadioButton
+                    android:id="@+id/radioButton1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Male"
+                    />
+
+                <RadioButton
+                    android:id="@+id/radioButton2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Female" />
+                </LinearLayout>
+            </RadioGroup>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="2"
+            android:layout_marginTop="10dp"
+            >
+            <Button
+                android:id="@+id/run"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Run"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/holo_green_light" />
+
+            <Button
+                android:id="@+id/stop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Stop"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/holo_red_light" />
+        </LinearLayout>
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

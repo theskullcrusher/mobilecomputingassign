@@ -4,15 +4,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/road"
     tools:context="com.group5project.mobilecomputing.group5.MainActivity">
 
     <TextView
+        android:id="@+id/tv1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:layout_height="300sp"
+        android:text="Welcome to CSE535 (MC) G5 Assignment1"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+        android:textColor="#ff0000"
+        android:layout_margin="10sp"
+        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.533"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.057"
+        />
+
+    <TextView
+        android:id="@+id/tv2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:text="Group Members:\n\n Satya Srinija Kanteti\n Akhila Muthyala\n Sita Rama Nikitha Pabolu\n Suraj Shah"
+        android:textAlignment="textEnd"
+        android:textColor="#ffffff"
+        android:textSize="15sp"
+        app:layout_constraintTop_toBottomOf="@id/tv1"
+        tools:layout_editor_absoluteX="10dp"
+        tools:layout_editor_absoluteY="368dp" />
 
 </android.support.constraint.ConstraintLayout>
