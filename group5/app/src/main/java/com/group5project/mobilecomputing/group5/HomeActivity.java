@@ -38,8 +38,12 @@ public class HomeActivity extends AppCompatActivity {
         series1 = new LineGraphSeries<DataPoint>();
         graph.addSeries(series1);
         Viewport viewport = graph.getViewport();
-//        viewport.setYAxisBoundsManual(true);
-//        viewport.setMinY(0);
+        viewport.setYAxisBoundsManual(true);
+        viewport.setMinY(0.0);
+        viewport.setMaxY(1.0);
+        viewport.setMinX(0.0);
+        viewport.setMaxX(100.0);
+        viewport.setScalable(true);
         viewport.setScrollable(true);
 
 //        int numPoints = 15000;
@@ -60,7 +64,7 @@ public class HomeActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i=0;i<100;i++){
+                for (int i=0;i<1000;i++){
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -85,7 +89,7 @@ public class HomeActivity extends AppCompatActivity {
      */
     public void updateGraph(){
         double lastY = Math.sin(lastX);
-        series1.appendData(new DataPoint(lastX, lastY), true, 10);
+        series1.appendData(new DataPoint(lastX, lastY), true, 1000);
         lastX+=0.1;
     }
 
