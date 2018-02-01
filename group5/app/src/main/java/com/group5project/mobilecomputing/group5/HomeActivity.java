@@ -3,12 +3,15 @@ package com.group5project.mobilecomputing.group5;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class HomeActivity extends AppCompatActivity {
@@ -17,38 +20,87 @@ public class HomeActivity extends AppCompatActivity {
     int backButtonCount = 0;
 
     private LineGraphSeries<DataPoint> series1;
-
+    private boolean run_flag = false;
+    private static final Random RANDOM = new Random();
+    private double lastX = 0.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        Button run = (Button) findViewById(R.id.run);
+        Button stop = (Button) findViewById(R.id.stop);
+
         double x,y;
-        x = 0;
+        x = 0.0;
         GraphView graph = (GraphView) findViewById(R.id.graph);
         series1 = new LineGraphSeries<DataPoint>();
-
-        int numPoints = 500;
-
-        for(int i=0;i<numPoints;i++){
-            x = x + 0.1;
-            y = Math.sin(x);
-            series1.appendData(new DataPoint(x,y), true, 100);
-        }
         graph.addSeries(series1);
+        Viewport viewport = graph.getViewport();
+//        viewport.setYAxisBoundsManual(true);
+//        viewport.setMinY(0);
+        viewport.setScrollable(true);
+
+//        int numPoints = 15000;
+//
+//        for(int i=0;i<numPoints;i++){
+//            x = x + 0.1;
+//            y = Math.sin(x);
+//            series1.appendData(new DataPoint(x,y), true, 1000);
+//        }
+
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i=0;i<100;i++){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateGraph();
+                        }
+                    });
+                    //Sleep for short time to show updates on screen
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+    }
+
+    /**
+     * Write a method with a flag to keep adding data to graph with run is called.
+     * Turn flag to false to stop adding any data
+     */
+    public void updateGraph(){
+        double lastY = Math.sin(lastX);
+        series1.appendData(new DataPoint(lastX, lastY), true, 10);
+        lastX+=0.1;
+    }
+
+
+
+//    public void nullifyBackPress() throws InterruptedException {
+//        TimeUnit.SECONDS.sleep(5);
+//        backButtonCount--;
+//    }
+
 
     /**
      * Back button listener.
      * https://stackoverflow.com/questions/2354336/android-pressing-back-button-should-exit-the-app
      */
-
-
-    public void nullifyBackPress() throws InterruptedException {
-        TimeUnit.SECONDS.sleep(5);
-        backButtonCount--;
-    }
 
     @Override
     public void onBackPressed()
@@ -62,11 +114,6 @@ public class HomeActivity extends AppCompatActivity {
         {
             Toast.makeText(this, "Please press the back button again to exit the application.", Toast.LENGTH_SHORT).show();
             backButtonCount++;
-            try {
-                nullifyBackPress();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
