@@ -51,7 +51,7 @@
         <com.jjoe64.graphview.GraphView
             android:layout_width="match_parent"
             android:layout_height="250dp" />
-            
+
         </LinearLayout>
 
 
@@ -103,16 +103,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             >
-            <RadioGroup
+
+            <LinearLayout
+                android:id="@+id/ll6"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <LinearLayout
-                    android:id="@+id/ll6"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_weight="3"
-                    >
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="3"
+                >
                 <TextView
                     android:id="@+id/tv3"
                     android:layout_width="0dp"
@@ -121,8 +119,15 @@
                     android:text="Sex:"
                     android:layout_weight="1"
                     android:textSize="20dp"
-                    android:background="@android:color/darker_gray" />
-                <RadioButton
+                    android:paddingRight="10dp"
+                    android:textStyle="bold"
+                    />
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+                    <RadioButton
                     android:id="@+id/radioButton1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -136,8 +141,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Female" />
-                </LinearLayout>
-            </RadioGroup>
+
+                </RadioGroup>
+            </LinearLayout>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/ll7"
