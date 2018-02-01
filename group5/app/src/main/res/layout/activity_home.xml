@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:layout_margin="10dp"
         >
         <!-- Part of this referred from https://stackoverflow.com/questions/19407909/how-to-size-two-textview-side-by-side-and-use-50-width-of-screen/19407981 -->
         <!--
@@ -49,6 +50,7 @@
             android:layout_marginTop="10dp"
             >
         <com.jjoe64.graphview.GraphView
+            android:id="@+id/graph"
             android:layout_width="match_parent"
             android:layout_height="250dp" />
 
@@ -131,7 +133,7 @@
                     android:id="@+id/radioButton1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="0.5"
                     android:text="Male"
                     />
 
@@ -151,7 +153,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_weight="2"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="30dp"
             >
             <Button
                 android:id="@+id/run"
