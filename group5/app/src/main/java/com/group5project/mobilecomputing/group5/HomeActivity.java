@@ -3,6 +3,7 @@ package com.group5project.mobilecomputing.group5;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -23,14 +24,16 @@ public class HomeActivity extends AppCompatActivity {
     private boolean run_flag = false;
     private static final Random RANDOM = new Random();
     private double lastX = 0.0;
+    private Button run;
+    private Button stop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        Button run = (Button) findViewById(R.id.run);
-        Button stop = (Button) findViewById(R.id.stop);
+        run = (Button) findViewById(R.id.run);
+        stop = (Button) findViewById(R.id.stop);
 
         double x,y;
         x = 0.0;
@@ -54,6 +57,21 @@ public class HomeActivity extends AppCompatActivity {
 //            series1.appendData(new DataPoint(x,y), true, 1000);
 //        }
 
+        run.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                run_flag = true;
+            }
+        });
+
+        stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                run_flag = false;
+            }
+        });
+
+
     }
 
 
@@ -64,18 +82,20 @@ public class HomeActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i=0;i<1000;i++){
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateGraph();
+                while (true) {
+                    while (run_flag) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateGraph();
+                            }
+                        });
+                        //Sleep for short time to show updates on screen
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
-                    });
-                    //Sleep for short time to show updates on screen
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
                 }
             }
