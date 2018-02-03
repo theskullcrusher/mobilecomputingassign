@@ -19,7 +19,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 Intent homeIntent = new Intent(MainActivity.this, HomeActivity.class);
                 startActivity(homeIntent);
-                //displays the splash screen for 4000ms before switching to HomeActivity
                 finish();
             }
         },SPLASHSCREENTIMEOUT);
