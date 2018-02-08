@@ -1,5 +1,6 @@
 package com.group5project.mobilecomputing.group5;
 
+import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_home);
 
         run = (Button) findViewById(R.id.run);
@@ -41,6 +43,8 @@ public class HomeActivity extends AppCompatActivity {
         double x,y;
         x = 0.0;
         graph = (GraphView) findViewById(R.id.graph);
+        graph.getGridLabelRenderer().setVerticalAxisTitle("ECG Strength");
+        graph.getGridLabelRenderer().setHorizontalAxisTitle("Real-time datapoints measurement(Time-scale)");
         series1 = new LineGraphSeries<DataPoint>();
         graph.addSeries(series1);
         Viewport viewport = graph.getViewport();
