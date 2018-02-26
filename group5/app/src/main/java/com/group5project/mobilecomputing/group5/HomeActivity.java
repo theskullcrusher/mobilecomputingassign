@@ -31,6 +31,7 @@ public class HomeActivity extends AppCompatActivity {
     private Button run;
     private Button stop;
 
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
