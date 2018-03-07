@@ -1,4 +1,4 @@
-package com.group5project.mobilecomputing.group5;
+package com.example.srinija.firstdemo;
 
 import android.Manifest;
 import android.content.Context;
@@ -7,12 +7,15 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -23,6 +26,8 @@ import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +40,20 @@ import android.database.sqlite.SQLiteException;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.Toast;
+
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 
 public class HomeActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback,SensorEventListener {
@@ -54,8 +73,12 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private Button run;
     private Button stop;
     private Button save;
+    private Button upload;
+    private Button download;
     private EditText pid, age, pname;
     private RadioGroup rg;
+    private Handler handler = new Handler();
+
     //SQLiteDatabase Db;
     Timestamp time;
     TimerTask timertask;
@@ -66,6 +89,10 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     //All sensor related code is added with reference to this tutorial https://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
+    public static final String TAG1= HomeActivity.class.getCanonicalName();
+    public static final String DbName= Environment.getExternalStorageDirectory().getAbsolutePath()
+            + "/Android/Data/CSE535_Assignment2/Group5db";
+    public static final int TOAST = 3;
 
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
@@ -101,6 +128,8 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         run = (Button) findViewById(R.id.run);
         stop = (Button) findViewById(R.id.stop);
         save = (Button) findViewById(R.id.save);
+        upload = (Button)findViewById(R.id.upload);
+        download = (Button)findViewById(R.id.download);
 
         pid = (EditText) findViewById(R.id.editText1);
         age = (EditText) findViewById(R.id.editText2);
@@ -167,6 +196,43 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                     Toast.makeText(getApplicationContext(),"Please enter all patient data and hit save to start recording values",Toast.LENGTH_LONG).show();
                 }
 
+            }
+        });
+
+        upload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    public void run() {
+                        /* https://www.codepuppet.com/2013/03/26/android-uploading-a-file-to-a-php-server/ */
+                        /* https://gist.github.com/Kieranties/2225346 */
+                        try {
+                            HttpClient hc = new DefaultHttpClient();
+                            HttpPost hp = new HttpPost("http://impact.asu.edu/CSE535Spring18Folder/UploadToServer.php");
+                            File f = new File(DbName);
+                            FileBody fb = new FileBody(f);
+                            MultipartEntity mp = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+                            mp.addPart("uploaded_file", fb);
+                            hp.setEntity(mp);
+                            HttpResponse hr = hc.execute(hp);
+                            HttpEntity he = hr.getEntity();
+
+                            if (hr != null) {
+                                Log.d(TAG1, "Response received");
+                                Log.d(TAG1, hr.getStatusLine().getReasonPhrase() + " " + hr.getStatusLine().getStatusCode());
+                                String messageText = EntityUtils.toString(he);
+                                Log.d(TAG1, messageText);
+                                handler.sendMessage(handler.obtainMessage(TOAST, "Response: " + messageText));
+                            } else {
+                                handler.sendMessage(handler.obtainMessage(TOAST, "Response not received"));
+                                Log.d(TAG1, "Response not received");
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.d(TAG1, "Exception caught");
+                        }
+                    }
+                }).start();
             }
         });
 
