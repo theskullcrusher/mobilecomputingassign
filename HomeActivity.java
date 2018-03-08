@@ -27,6 +27,7 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Random;
@@ -236,6 +237,34 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             }
         });
 
+        download.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            HttpClient hc = new DefaultHttpClient();
+                            HttpGet hg = new HttpGet("http://impact.asu.edu/CSE535Spring18Folder/Group5db");
+                            HttpResponse hr = hc.execute(hg);
+                            HttpEntity he = hr.getEntity();
+
+                            if (he != null) {
+                                File downloadPath = new File(Environment.getExternalStorageDirectory() + "/Android/Data/CSE535_ASSIGNMENT2_DOWN/");
+                                if (!downloadPath.exists())
+                                    downloadPath.mkdirs();
+                                FileOutputStream fos = new FileOutputStream(new File(downloadPath, "Group5db"));
+                                he.writeTo(fos);
+                                fos.close();
+                                handler.sendMessage(handler.obtainMessage(TOAST, "Downloaded successfully!"));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.d(TAG1, "Exception caught");
+                        }
+                    }
+                }).start();
+            }
+        });
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
