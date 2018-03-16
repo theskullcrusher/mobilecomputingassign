@@ -1,14 +1,22 @@
 package com.group5project.mobilecomputing.group5;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -18,19 +26,46 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import android.hardware.SensorEventListener;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import java.util.Timer;
+import java.util.TimerTask;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.Toast;
 
-public class HomeActivity extends AppCompatActivity implements SensorEventListener {
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
+
+public class HomeActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback,SensorEventListener {
 
     //more than one press of back button exits the app and finishes the activity
     int backButtonCount = 0;
-
-    private LineGraphSeries<DataPoint> series1, series2, series3;
+    private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 8503;
+    private LineGraphSeries<DataPoint> series1, series2, series3,series4,series5,series6;
     GraphView graph;
     private DataPoint[] data;
     private boolean run_flag = false;
@@ -39,33 +74,89 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
     private int SPIKE_PERIOD = 20;
     private double SPIKE_AMPLITUDE = 40.0;
     private double lastX = 0.0;
+    private double lastXd = 0.0;
     private Button run;
     private Button stop;
     private Button save;
+    private Button upload;
+    private Button download;
+    private RadioButton maleButton;
+    private RadioButton femaleButton;
     private EditText pid, age, pname;
     private RadioGroup rg;
+    private Handler handler = new Handler();
+    private boolean Download_Flag;
+    private List<XYZvalues> values;
+    private String str1,str2,str3,str4;
+    private String Table_Name;
+
+    //SQLiteDatabase Db;
+    Timestamp time;
+    TimerTask timertask;
+    Timer timer;
+    MyDatabase Db1;
+    MyDatabase Db2;
+    private boolean DataBaseFlag;
 
     //All sensor related code is added with reference to this tutorial https://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
+    public static final String TAG1= HomeActivity.class.getCanonicalName();
+    public static final String DbName= Environment.getExternalStorageDirectory().getAbsolutePath()
+            + "/Android/Data/CSE535_Assignment2/Group5db.db";
+    public static final String DbName2  = Environment.getExternalStorageDirectory().getAbsolutePath()
+                        + "/Android/Data/CSE535_ASSIGNMENT2_DOWN/Group5db.db";
+    public static final int TOAST = 3;
 
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
+
+    //permissions code from stack overflow
+    private void storagePermissionCheck() {
+        if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(HomeActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+        }
+        if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(HomeActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case STORAGE_PERMISSIONS_REQUEST_CODE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                }
+                else
+                    HomeActivity.this.finish();
+
+                return;
+            }
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_home);
+        storagePermissionCheck();
 
         run = (Button) findViewById(R.id.run);
         stop = (Button) findViewById(R.id.stop);
         save = (Button) findViewById(R.id.save);
+        upload = (Button)findViewById(R.id.upload);
+        download = (Button)findViewById(R.id.download);
 
         pid = (EditText) findViewById(R.id.editText1);
         age = (EditText) findViewById(R.id.editText2);
         pname = (EditText) findViewById(R.id.editText3);
         rg = (RadioGroup) findViewById(R.id.rg1);
+        maleButton = (RadioButton)findViewById(R.id.radioButton1);
+        femaleButton = (RadioButton)findViewById(R.id.radioButton2);
+
 
         double x,y;
         x = 0.0;
@@ -81,12 +172,21 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
         series2.setColor(Color.GREEN);
         series3.setTitle("Z Axis");
         series3.setColor(Color.BLUE);
+        series4 = new LineGraphSeries<DataPoint>();
+        series5 = new LineGraphSeries<DataPoint>();
+        series6 = new LineGraphSeries<DataPoint>();
+        series4.setTitle("X Axis");
+        series4.setColor(Color.RED);
+        series5.setTitle("Y Axis");
+        series5.setColor(Color.GREEN);
+        series6.setTitle("Z Axis");
+        series6.setColor(Color.BLUE);
         Viewport viewport = graph.getViewport();
         viewport.setYAxisBoundsManual(true);
         viewport.setMinY(0.0);
-        viewport.setMaxY(50.0);
+        viewport.setMaxY(20.0);
         viewport.setMinX(0.0);
-        viewport.setMaxX(100.0);
+        viewport.setMaxX(10.0);
         viewport.setScalable(true);
         viewport.setScrollable(true);
 
@@ -95,10 +195,20 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View view) {
                 run_flag = true;
                 clear_data = false;
+                if (Download_Flag == true) {
+                    graph.removeAllSeries();
+                    graph.addSeries(series4);
+                    graph.addSeries(series5);
+                    graph.addSeries(series6);
+                }
+                //to remove to downloaded part graph if there
                 //adds the series to the graph whenever run is pressed; shows the updated graph on clicking run after clear
-                graph.addSeries(series1);
-                graph.addSeries(series2);
-                graph.addSeries(series3);
+                else {
+                    graph.removeAllSeries();
+                    graph.addSeries(series1);
+                    graph.addSeries(series2);
+                    graph.addSeries(series3);
+                }
             }
         });
 
@@ -109,14 +219,22 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
                 clear_data = true;
             }
         });
+
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Download_Flag = false;
                 boolean flag = validatePatientInput(pid, age, pname, rg);
+                str1 = pname.getText().toString().replaceAll("[^a-zA-Z0-9]","");
+                str2 = pid.getText().toString().replaceAll("[^a-zA-Z0-9]","");
+                str3 = age.getText().toString().replaceAll("[^a-zA-Z0-9]","");
+                str4 = (maleButton.isChecked()?"Male":"Female");
                 if(flag == true) {
-                    //Call a function here to initialize database and then call another function from resume loop to put data into db and display graph too
-                    //db = initializeDatabase();
-                    Toast.makeText(getApplicationContext(),"Successfully started recording. Displaying graph",Toast.LENGTH_LONG).show();
+                    Db1 = new MyDatabase(getApplicationContext()); // creating database
+                    Db1.data(str1,str2,str3,str4); // create database table
+                    //Db1.ClearData(); //clear previous data, remove if not required
+                    DataBaseFlag = true;
+                    Toast.makeText(getApplicationContext(),"Successfully started recording.",Toast.LENGTH_LONG).show();
                 }
                 else{
                     Toast.makeText(getApplicationContext(),"Please enter all patient data and hit save to start recording values",Toast.LENGTH_LONG).show();
@@ -125,12 +243,91 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
+        upload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    public void run() {
+                        /* https://www.codepuppet.com/2013/03/26/android-uploading-a-file-to-a-php-server/ */
+                        /* https://gist.github.com/Kieranties/2225346 */
+                        try {
+                            HttpClient hc = new DefaultHttpClient();
+                            HttpPost hp = new HttpPost("http://impact.asu.edu/CSE535Spring18Folder/UploadToServer.php");
+                            File f = new File(DbName);
+                            FileBody fb = new FileBody(f);
+                            MultipartEntity mp = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+                            mp.addPart("uploaded_file", fb);
+                            hp.setEntity(mp);
+                            HttpResponse hr = hc.execute(hp);
+                            HttpEntity he = hr.getEntity();
+
+                            if (hr != null) {
+                                Log.d(TAG1, "Response received");
+                                Log.d(TAG1, hr.getStatusLine().getReasonPhrase() + " " + hr.getStatusLine().getStatusCode());
+                                String messageText = EntityUtils.toString(he);
+                                Log.d(TAG1, messageText);
+                                handler.sendMessage(handler.obtainMessage(TOAST, "Response: " + messageText));
+                            } else {
+                                handler.sendMessage(handler.obtainMessage(TOAST, "Response not received"));
+                                Log.d(TAG1, "Response not received");
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.d(TAG1, "Exception caught");
+                        }
+                    }
+                }).start();
+            }
+        });
+
+        download.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Download_Flag = true;
+
+                //run_flag = false;
+                //clear_data = false;
+                new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            HttpClient hc = new DefaultHttpClient();
+                            HttpGet hg = new HttpGet("http://impact.asu.edu/CSE535Spring18Folder/Group5db.db");
+                            HttpResponse hr = hc.execute(hg);
+                            HttpEntity he = hr.getEntity();
+
+                            if (he != null) {
+                                File downloadPath = new File(Environment.getExternalStorageDirectory() + "/Android/Data/CSE535_ASSIGNMENT2_DOWN/");
+                                if (!downloadPath.exists())
+                                    downloadPath.mkdirs();
+                                FileOutputStream fos = new FileOutputStream(new File(downloadPath, "Group5db.db"));
+                                he.writeTo(fos);
+                                fos.close();
+                                handler.sendMessage(handler.obtainMessage(TOAST, "Downloaded successfully!"));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.d(TAG1, "Exception caught");
+                        }
+                        Db2 = new MyDatabase(getApplicationContext(),DbName2);
+                        Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
+                        values = Db2.readData(Table_Name);
+                        Log.d(TAG1,"Reading data from downloaded database");
+                    }
+                }).start();
+                /*Db2 = new MyDatabase(getApplicationContext(),DbName2);
+                Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
+                values = Db2.readData(Table_Name);
+                Log.d(TAG1, "Reading data from downloaded Db");
+                //updateGraph();*/
+            }
+        });
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
 
     }
+    //https://examples.javacodegeeks.com/android/core/activity/android-timertask-example/
 
     public boolean validatePatientInput(EditText pid, EditText age, EditText pname, RadioGroup rg){
         final String str1 = pid.getText().toString().trim();
@@ -189,6 +386,7 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
                             e.printStackTrace();
                         }
                     }
+
                 }
             }
         }).start();
@@ -202,9 +400,9 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
      */
 /*    public void updateGraph(){
         *//**
-         * To simulate ECG type of graph
-         * https://stackoverflow.com/questions/23167879/java-how-to-simulate-an-ecg-electro-cardiogram
-         *//*
+     * To simulate ECG type of graph
+     * https://stackoverflow.com/questions/23167879/java-how-to-simulate-an-ecg-electro-cardiogram
+     *//*
         double lastY = RANDOM.nextDouble() * 5d;
         if (lastX % SPIKE_PERIOD == 0) {
             lastY = SPIKE_AMPLITUDE;
@@ -218,15 +416,50 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
          * This function takes the updated accelerometer values and displays on the graph
          *
          */
+        if(Download_Flag == true){
+            Log.d(TAG1, "In IF part of update graph");
+            for(int i = 0; i < 10;i++) {
+                series4.appendData(new DataPoint(lastXd, values.get(i).x_value), true, 1000);
+                series5.appendData(new DataPoint(lastXd, values.get(i).y_value), true, 1000);
+                series6.appendData(new DataPoint(lastXd, values.get(i).z_value), true, 1000);
+                lastXd += 1;
+                System.out.println(values.get(i).x_value);
+                System.out.println(values.get(i).y_value);
+                System.out.println(values.get(i).z_value);
+
+            }
+           //lastXd = 0.0;
+            return;
+        }
         series1.appendData(new DataPoint(lastX, last_x), true, 1000);
         series2.appendData(new DataPoint(lastX, last_y), true, 1000);
         series3.appendData(new DataPoint(lastX, last_z), true, 1000);
         lastX += 1;
     }
 
+    //https://www.androidhive.info/2011/11/android-sqlite-database-tutorial/
+    //to read from downloaded databases
 
-
-
+    /*public void ReadData(){
+        values = new ArrayList<XYZvalues>();
+        String DbName =Environment.getExternalStorageDirectory().getAbsolutePath()
+                + "/Android/Data/CSE535_ASSIGNMENT2_DOWN/Group5db.db";
+        SQLiteDatabase db1 = SQLiteDatabase.openDatabase(DbName,null,SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READWRITE);
+        String Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
+        Log.d(TAG1, "Downloaded Db opened");
+        Cursor cursor = db1.rawQuery("SELECT * FROM Srinija_520_23_Male LIMIT 10 OFFSET (SELECT COUNT(*) FROM Srinija_520_23_Male)-10", null);
+        Log.d(TAG1,"Query reading");
+        if(cursor.moveToFirst()) {
+            do {
+                XYZvalues xyz_value = new XYZvalues();
+                xyz_value.x_value = cursor.getFloat(1);
+                xyz_value.y_value = cursor.getFloat(2);
+                xyz_value.z_value = cursor.getFloat(3);
+                values.add(xyz_value);
+                Log.d(TAG1, "appending to the array list");
+            } while (cursor.moveToNext());
+        }
+    }*/
 
     /**
      * Back button listener.
@@ -256,10 +489,11 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
-
+            boolean flag = validatePatientInput(pid, age, pname, rg);
             long curTime = System.currentTimeMillis();
-
             if ((curTime - lastUpdate) > 995) {
+                if (DataBaseFlag == true)
+                Db1.AddData(curTime,x,y,z,str1,str2,str3,str4);
                 long diffTime = (curTime - lastUpdate);
                 lastUpdate = curTime;
                 last_x = x;
@@ -279,4 +513,5 @@ public class HomeActivity extends AppCompatActivity implements SensorEventListen
         super.onPause();
         senSensorManager.unregisterListener(this);
     }
+
 }
