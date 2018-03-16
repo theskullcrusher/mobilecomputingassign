@@ -195,20 +195,18 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             public void onClick(View view) {
                 run_flag = true;
                 clear_data = false;
-                if (Download_Flag == true) {
+                /*if (Download_Flag == true) {
                     graph.removeAllSeries();
                     graph.addSeries(series4);
                     graph.addSeries(series5);
                     graph.addSeries(series6);
-                }
+                }*/
                 //to remove to downloaded part graph if there
                 //adds the series to the graph whenever run is pressed; shows the updated graph on clicking run after clear
-                else {
                     graph.removeAllSeries();
                     graph.addSeries(series1);
                     graph.addSeries(series2);
                     graph.addSeries(series3);
-                }
             }
         });
 
@@ -312,6 +310,10 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                         Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
                         values = Db2.readData(Table_Name);
                         Log.d(TAG1,"Reading data from downloaded database");
+                        graph.removeAllSeries();
+                        graph.addSeries(series4);
+                        graph.addSeries(series5);
+                        graph.addSeries(series6);
                     }
                 }).start();
                 /*Db2 = new MyDatabase(getApplicationContext(),DbName2);
@@ -394,23 +396,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    /**
-     * Write a method with a flag to keep adding data to graph with run is called.
-     * Turn flag to false to stop adding any data
-     */
-/*    public void updateGraph(){
-        *//**
-     * To simulate ECG type of graph
-     * https://stackoverflow.com/questions/23167879/java-how-to-simulate-an-ecg-electro-cardiogram
-     *//*
-        double lastY = RANDOM.nextDouble() * 5d;
-        if (lastX % SPIKE_PERIOD == 0) {
-            lastY = SPIKE_AMPLITUDE;
-        }
-        series1.appendData(new DataPoint(lastX, lastY), true, 1000);
-        lastX += 2;
-    }*/
-
     public void updateGraph(){
         /**
          * This function takes the updated accelerometer values and displays on the graph
@@ -431,6 +416,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
            //lastXd = 0.0;
             return;
         }
+        System.out.println("Again plotting original graph");
         series1.appendData(new DataPoint(lastX, last_x), true, 1000);
         series2.appendData(new DataPoint(lastX, last_y), true, 1000);
         series3.appendData(new DataPoint(lastX, last_z), true, 1000);
