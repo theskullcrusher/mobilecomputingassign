@@ -213,7 +213,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                 clear_data = true;
             }
         });
-
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -270,6 +269,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                         } catch (IOException e) {
                             e.printStackTrace();
                             Log.d(TAG1, "Exception caught");
+                            uploadClicked = false;
                         }
 
                     }
@@ -280,7 +280,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(uploadClicked){
                     Download_Flag = true;
                     new Thread(new Runnable() {
                         public void run() {
@@ -332,13 +331,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                         }
                     }).start();
                 }
-                else {
-                    Toast.makeText(getApplicationContext(),"Please UploAD FIRST",Toast.LENGTH_LONG).show();
-                }
-
-
-
-            }
         });
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);

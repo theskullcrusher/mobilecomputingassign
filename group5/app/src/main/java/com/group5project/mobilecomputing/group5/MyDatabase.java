@@ -3,11 +3,14 @@ package com.group5project.mobilecomputing.group5;
         import android.content.Context;
         import android.database.Cursor;
         import android.database.sqlite.SQLiteDatabase;
+        import android.database.sqlite.SQLiteException;
         import android.os.Environment;
         import android.database.sqlite.SQLiteOpenHelper;
         import android.util.Log;
 
+        import java.io.IOException;
         import java.sql.ResultSet;
+        import java.sql.SQLException;
         import java.sql.Statement;
         import java.util.ArrayList;
         import java.util.List;
@@ -77,35 +80,37 @@ public class MyDatabase extends SQLiteOpenHelper {
 
     }
 
-    /*public void ClearData(){
-        SQLiteDatabase db1 = this.getWritableDatabase();
-        db1.execSQL("DELETE FROM "+ "NAME_ID_SEX_AGE");
-    }*/
     public List<XYZvalues> readData(String Table_Name) {
         List<XYZvalues> values;
         values = new ArrayList<XYZvalues>();
         int i = 0;
         SQLiteDatabase db2 = this.getReadableDatabase();
-        Cursor cursor = db2.rawQuery("SELECT * FROM " + Table_Name + " ORDER BY TIMESTAMP DESC", null);
-        String countQuery = "SELECT  * FROM " + Table_Name;
-       // SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor1 = db2.rawQuery(countQuery, null);
-        int count = cursor1.getCount();
-        cursor1.close();
+        try {
+            Cursor cursor = db2.rawQuery("SELECT * FROM " + Table_Name + " ORDER BY TIMESTAMP DESC", null);
+            String countQuery = "SELECT  * FROM " + Table_Name;
+            Cursor cursor1 = db2.rawQuery(countQuery, null);
+            int count = cursor1.getCount();
+            cursor1.close();
 
-        if (cursor.moveToFirst()) {
-            do {
-                XYZvalues xyz_value = new XYZvalues();
-                xyz_value.x_value = cursor.getFloat(1);
-                xyz_value.y_value = cursor.getFloat(2);
-                xyz_value.z_value = cursor.getFloat(3);
-                values.add(xyz_value);
-                Log.d(TAG, "appending to the array list");
-                cursor.moveToNext();
-                i++;
-            } while (i < Math.min(count, 10));
+            if (cursor.moveToFirst()) {
+                do {
+                    XYZvalues xyz_value = new XYZvalues();
+                    xyz_value.x_value = cursor.getFloat(1);
+                    xyz_value.y_value = cursor.getFloat(2);
+                    xyz_value.z_value = cursor.getFloat(3);
+                    values.add(xyz_value);
+                    Log.d(TAG, "appending to the array list");
+                    cursor.moveToNext();
+                    i++;
+                } while (i < Math.min(count, 10));
+            }
+            db2.close();
+
         }
-        db2.close();
+        catch (SQLiteException e) {
+            e.printStackTrace();
+            Log.d(TAG, "Exception caught");
+        }
         return values;
     }
 }
