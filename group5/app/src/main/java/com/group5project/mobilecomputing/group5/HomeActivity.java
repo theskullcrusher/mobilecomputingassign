@@ -79,6 +79,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private Button stop;
     private Button save;
     private Button upload;
+    private boolean uploadClicked = false;
     private Button download;
     private RadioButton maleButton;
     private RadioButton femaleButton;
@@ -89,6 +90,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private List<XYZvalues> values;
     private String str1,str2,str3,str4;
     private String Table_Name;
+    private boolean DownloadFinish = false;
 
     //SQLiteDatabase Db;
     Timestamp time;
@@ -195,12 +197,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             public void onClick(View view) {
                 run_flag = true;
                 clear_data = false;
-                /*if (Download_Flag == true) {
-                    graph.removeAllSeries();
-                    graph.addSeries(series4);
-                    graph.addSeries(series5);
-                    graph.addSeries(series6);
-                }*/
                 //to remove to downloaded part graph if there
                 //adds the series to the graph whenever run is pressed; shows the updated graph on clicking run after clear
                     graph.removeAllSeries();
@@ -244,6 +240,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 new Thread(new Runnable() {
                     public void run() {
                         /* https://www.codepuppet.com/2013/03/26/android-uploading-a-file-to-a-php-server/ */
@@ -269,10 +266,12 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                                 handler.sendMessage(handler.obtainMessage(TOAST, "Response not received"));
                                 Log.d(TAG1, "Response not received");
                             }
+                            uploadClicked = true;
                         } catch (IOException e) {
                             e.printStackTrace();
                             Log.d(TAG1, "Exception caught");
                         }
+
                     }
                 }).start();
             }
@@ -281,46 +280,64 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Download_Flag = true;
+                if(uploadClicked){
+                    Download_Flag = true;
+                    new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                HttpClient hc = new DefaultHttpClient();
+                                HttpGet hg = new HttpGet("http://impact.asu.edu/CSE535Spring18Folder/Group5db.db");
+                                HttpResponse hr = hc.execute(hg);
+                                HttpEntity he = hr.getEntity();
 
-                //run_flag = false;
-                //clear_data = false;
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            HttpClient hc = new DefaultHttpClient();
-                            HttpGet hg = new HttpGet("http://impact.asu.edu/CSE535Spring18Folder/Group5db.db");
-                            HttpResponse hr = hc.execute(hg);
-                            HttpEntity he = hr.getEntity();
-
-                            if (he != null) {
-                                File downloadPath = new File(Environment.getExternalStorageDirectory() + "/Android/Data/CSE535_ASSIGNMENT2_DOWN/");
-                                if (!downloadPath.exists())
-                                    downloadPath.mkdirs();
-                                FileOutputStream fos = new FileOutputStream(new File(downloadPath, "Group5db.db"));
-                                he.writeTo(fos);
-                                fos.close();
-                                handler.sendMessage(handler.obtainMessage(TOAST, "Downloaded successfully!"));
+                                if (he != null) {
+                                    File downloadPath = new File(Environment.getExternalStorageDirectory() + "/Android/Data/CSE535_ASSIGNMENT2_DOWN/");
+                                    if (!downloadPath.exists())
+                                        downloadPath.mkdirs();
+                                    FileOutputStream fos = new FileOutputStream(new File(downloadPath, "Group5db.db"));
+                                    he.writeTo(fos);
+                                    fos.close();
+                                    handler.sendMessage(handler.obtainMessage(TOAST, "Downloaded successfully!"));
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Log.d(TAG1, "Exception caught");
                             }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Log.d(TAG1, "Exception caught");
+                            Db2 = new MyDatabase(getApplicationContext(),DbName2);
+                            Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
+                            values = Db2.readData(Table_Name);
+                            Log.d(TAG1,"Reading data from downloaded database");
+                            DownloadFinish = true;
+                            graph.removeAllSeries();
+                            graph.addSeries(series4);
+                            graph.addSeries(series5);
+                            graph.addSeries(series6);
+                            if(DownloadFinish) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(),"Successfully Downloaded Database",Toast.LENGTH_LONG).show();
+                                        updateDownloadGraph(values);
+                                        run_flag = false;
+                                        DownloadFinish = false;
+                                    }
+                                });
+                                //Sleep for short time to show updates on screen
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
-                        Db2 = new MyDatabase(getApplicationContext(),DbName2);
-                        Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
-                        values = Db2.readData(Table_Name);
-                        Log.d(TAG1,"Reading data from downloaded database");
-                        graph.removeAllSeries();
-                        graph.addSeries(series4);
-                        graph.addSeries(series5);
-                        graph.addSeries(series6);
-                    }
-                }).start();
-                /*Db2 = new MyDatabase(getApplicationContext(),DbName2);
-                Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
-                values = Db2.readData(Table_Name);
-                Log.d(TAG1, "Reading data from downloaded Db");
-                //updateGraph();*/
+                    }).start();
+                }
+                else {
+                    Toast.makeText(getApplicationContext(),"Please UploAD FIRST",Toast.LENGTH_LONG).show();
+                }
+
+
+
             }
         });
 
@@ -401,7 +418,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
          * This function takes the updated accelerometer values and displays on the graph
          *
          */
-        if(Download_Flag == true){
+       /* if(Download_Flag == true){
             Log.d(TAG1, "In IF part of update graph");
             for(int i = 0; i < 10;i++) {
                 series4.appendData(new DataPoint(lastXd, values.get(i).x_value), true, 1000);
@@ -415,13 +432,28 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             }
            //lastXd = 0.0;
             return;
-        }
+        }*/
         System.out.println("Again plotting original graph");
         series1.appendData(new DataPoint(lastX, last_x), true, 1000);
         series2.appendData(new DataPoint(lastX, last_y), true, 1000);
         series3.appendData(new DataPoint(lastX, last_z), true, 1000);
         lastX += 1;
     }
+    public void updateDownloadGraph(List<XYZvalues> values1){
+        Log.d(TAG1, "In update Download graph");
+        for(int i = 0; i < values1.size();i++) {
+            series4.appendData(new DataPoint(lastXd, values.get(i).x_value), true, 1000);
+            series5.appendData(new DataPoint(lastXd, values.get(i).y_value), true, 1000);
+            series6.appendData(new DataPoint(lastXd, values.get(i).z_value), true, 1000);
+            lastXd += 1;
+            System.out.println(values.get(i).x_value);
+            System.out.println(values.get(i).y_value);
+            System.out.println(values.get(i).z_value);
+
+        }
+
+    }
+
 
     //https://www.androidhive.info/2011/11/android-sqlite-database-tutorial/
     //to read from downloaded databases

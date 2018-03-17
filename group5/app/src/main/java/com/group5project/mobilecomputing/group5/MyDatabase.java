@@ -7,6 +7,8 @@ package com.group5project.mobilecomputing.group5;
         import android.database.sqlite.SQLiteOpenHelper;
         import android.util.Log;
 
+        import java.sql.ResultSet;
+        import java.sql.Statement;
         import java.util.ArrayList;
         import java.util.List;
 
@@ -85,6 +87,12 @@ public class MyDatabase extends SQLiteOpenHelper {
         int i = 0;
         SQLiteDatabase db2 = this.getReadableDatabase();
         Cursor cursor = db2.rawQuery("SELECT * FROM " + Table_Name + " ORDER BY TIMESTAMP DESC", null);
+        String countQuery = "SELECT  * FROM " + Table_Name;
+       // SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor1 = db2.rawQuery(countQuery, null);
+        int count = cursor1.getCount();
+        cursor1.close();
+
         if (cursor.moveToFirst()) {
             do {
                 XYZvalues xyz_value = new XYZvalues();
@@ -95,7 +103,7 @@ public class MyDatabase extends SQLiteOpenHelper {
                 Log.d(TAG, "appending to the array list");
                 cursor.moveToNext();
                 i++;
-            } while (i <= 10);
+            } while (i < Math.min(count, 10));
         }
         db2.close();
         return values;
