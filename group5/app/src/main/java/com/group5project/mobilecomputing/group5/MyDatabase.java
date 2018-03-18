@@ -80,6 +80,7 @@ public class MyDatabase extends SQLiteOpenHelper {
 
     }
 
+    //https://www.androidhive.info/2011/11/android-sqlite-database-tutorial/
     public List<XYZvalues> readData(String Table_Name) {
         List<XYZvalues> values;
         values = new ArrayList<XYZvalues>();
