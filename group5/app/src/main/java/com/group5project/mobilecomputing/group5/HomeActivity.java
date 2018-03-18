@@ -136,6 +136,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                 return;
             }
         }
+
     }
 
     @Override
@@ -244,51 +245,41 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (saveClicked) {
-                    /*only if some data has been saved, it allows upload*/
-                    boolean flag = validatePatientInput(pid, age, pname, rg);
-                    if (flag == true) {
-                        uploadClicked = true;
-                        new Thread(new Runnable() {
-                            public void run() {
-                                try {
-                                    /*sends HTTP requests and gets responses from a server identified a URL*/
-                                    HttpClient hc = new DefaultHttpClient();
-                                    /*requests the server to accept the enclosed entity to be part of it*/
-                                    HttpPost hp = new HttpPost("http://impact.asu.edu/CSE535Spring18Folder/UploadToServer.php");
-                                    File f = new File(DbName);
-                                    FileBody fb = new FileBody(f);
-                                    MultipartEntity mp = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-                                    mp.addPart("uploaded_file", fb);
-                                    hp.setEntity(mp);
-                                    HttpResponse hr = hc.execute(hp);
-                                    HttpEntity he = hr.getEntity();
 
-                                    if (hr != null) {
-                                        Log.d(TAG1, "Response received");
-                                        Log.d(TAG1, hr.getStatusLine().getReasonPhrase() + " " + hr.getStatusLine().getStatusCode());
-                                        String messageText = EntityUtils.toString(he);
-                                        Log.d(TAG1, messageText);
-                                        handler.sendMessage(handler.obtainMessage(TOAST, "Response: " + messageText));
-                                    } else {
-                                        handler.sendMessage(handler.obtainMessage(TOAST, "Response not received"));
-                                        Log.d(TAG1, "Response not received");
-                                    }
+                new Thread(new Runnable() {
+                    public void run() {
+                        /* https://www.codepuppet.com/2013/03/26/android-uploading-a-file-to-a-php-server/ */
+                        /* https://gist.github.com/Kieranties/2225346 */
+                        try {
+                            HttpClient hc = new DefaultHttpClient();
+                            HttpPost hp = new HttpPost("http://impact.asu.edu/CSE535Spring18Folder/UploadToServer.php");
+                            File f = new File(DbName);
+                            FileBody fb = new FileBody(f);
+                            MultipartEntity mp = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+                            mp.addPart("uploaded_file", fb);
+                            hp.setEntity(mp);
+                            HttpResponse hr = hc.execute(hp);
+                            HttpEntity he = hr.getEntity();
 
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    Log.d(TAG1, "Exception caught");
-                                }
+                            if (hr != null) {
+                                Log.d(TAG1, "Response received");
+                                Log.d(TAG1, hr.getStatusLine().getReasonPhrase() + " " + hr.getStatusLine().getStatusCode());
+                                String messageText = EntityUtils.toString(he);
+                                Log.d(TAG1, messageText);
+                                handler.sendMessage(handler.obtainMessage(TOAST, "Response: " + messageText));
+                            } else {
+                                handler.sendMessage(handler.obtainMessage(TOAST, "Response not received"));
+                                Log.d(TAG1, "Response not received");
                             }
-                        }).start();
+                            uploadClicked = true;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.d(TAG1, "Exception caught");
+                            uploadClicked = false;
+                        }
+
                     }
-                    else {
-                        Toast.makeText(getApplicationContext(), "Please enter patient data first", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(getApplicationContext(), "Please save the data first", Toast.LENGTH_LONG).show();
-                }
-                Toast.makeText(getApplicationContext(),"Uploaded Successfully",Toast.LENGTH_LONG).show();
+                }).start();
             }
         });
 
@@ -296,11 +287,8 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             @Override
             public void onClick(View v) {
                 if(uploadClicked){
-                    /*only if upload is done, it allows download*/
-                    boolean flag = validatePatientInput(pid, age, pname, rg);
-                    if(flag == true) {
-                        Download_Flag = true;
-                        new Thread(new Runnable() {
+                    Download_Flag = true;
+                    new Thread(new Runnable() {
                         public void run() {
                             try {
                                 HttpClient hc = new DefaultHttpClient();
@@ -352,19 +340,18 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                     }).start();
                 }
                 else {
-                        Toast.makeText(getApplicationContext(), "Please enter patient data first", Toast.LENGTH_LONG).show();
-                    }
+                    Toast.makeText(getApplicationContext(),"Please UploAD FIRST",Toast.LENGTH_LONG).show();
                 }
-                else {
-                    Toast.makeText(getApplicationContext(), "Please Upload first", Toast.LENGTH_LONG).show();
 
-                }
+
+
             }
         });
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+
     }
     //https://examples.javacodegeeks.com/android/core/activity/android-timertask-example/
 
@@ -383,9 +370,12 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -423,14 +413,17 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                             e.printStackTrace();
                         }
                     }
+
                 }
             }
         }).start();
+
         senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     /* This function takes the updated accelerometer values and displays on the graph */
     public void updateGraph(){
+ );
         series1.appendData(new DataPoint(lastX, last_x), true, 1000);
         series2.appendData(new DataPoint(lastX, last_y), true, 1000);
         series3.appendData(new DataPoint(lastX, last_z), true, 1000);
