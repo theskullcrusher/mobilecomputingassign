@@ -81,6 +81,7 @@ public class MyDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db1 = this.getWritableDatabase();
         db1.execSQL("DELETE FROM "+ "NAME_ID_SEX_AGE");
     }*/
+    //https://www.androidhive.info/2011/11/android-sqlite-database-tutorial/
     public List<XYZvalues> readData(String Table_Name) {
         List<XYZvalues> values;
         values = new ArrayList<XYZvalues>();

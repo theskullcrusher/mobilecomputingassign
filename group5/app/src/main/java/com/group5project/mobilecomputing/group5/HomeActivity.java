@@ -91,6 +91,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private String str1,str2,str3,str4;
     private String Table_Name;
     private boolean DownloadFinish = false;
+    private boolean saveClicked = false;
 
     //SQLiteDatabase Db;
     Timestamp time;
@@ -113,7 +114,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
 
-    //permissions code from stack overflow
+    //permissions code from stackoverflow
     private void storagePermissionCheck() {
         if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(HomeActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
@@ -127,8 +128,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case STORAGE_PERMISSIONS_REQUEST_CODE: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 }
                 else
                     HomeActivity.this.finish();
@@ -136,7 +136,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                 return;
             }
         }
-
     }
 
     @Override
@@ -197,7 +196,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             public void onClick(View view) {
                 run_flag = true;
                 clear_data = false;
-                //to remove to downloaded part graph if there
+                //to remove to downloaded part graph if there and show the original graph
                 //adds the series to the graph whenever run is pressed; shows the updated graph on clicking run after clear
                     graph.removeAllSeries();
                     graph.addSeries(series1);
@@ -217,6 +216,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                saveClicked = true;
                 Download_Flag = false;
                 boolean flag = validatePatientInput(pid, age, pname, rg);
                 str1 = pname.getText().toString().replaceAll("[^a-zA-Z0-9]","");
@@ -226,7 +226,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                 if(flag == true) {
                     Db1 = new MyDatabase(getApplicationContext()); // creating database
                     Db1.data(str1,str2,str3,str4); // create database table
-                    //Db1.ClearData(); //clear previous data, remove if not required
                     DataBaseFlag = true;
                     Toast.makeText(getApplicationContext(),"Successfully started recording.",Toast.LENGTH_LONG).show();
                 }
@@ -237,43 +236,59 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             }
         });
 
+        /*
+         * All upload and download related code is added with reference to these examples:
+         * https://www.codepuppet.com/2013/03/26/android-uploading-a-file-to-a-php-server/
+         * https://gist.github.com/Kieranties/2225346
+         */
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (saveClicked) {
+                    /*only if some data has been saved, it allows upload*/
+                    boolean flag = validatePatientInput(pid, age, pname, rg);
+                    if (flag == true) {
+                        uploadClicked = true;
+                        new Thread(new Runnable() {
+                            public void run() {
+                                try {
+                                    /*sends HTTP requests and gets responses from a server identified a URL*/
+                                    HttpClient hc = new DefaultHttpClient();
+                                    /*requests the server to accept the enclosed entity to be part of it*/
+                                    HttpPost hp = new HttpPost("http://impact.asu.edu/CSE535Spring18Folder/UploadToServer.php");
+                                    File f = new File(DbName);
+                                    FileBody fb = new FileBody(f);
+                                    MultipartEntity mp = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+                                    mp.addPart("uploaded_file", fb);
+                                    hp.setEntity(mp);
+                                    HttpResponse hr = hc.execute(hp);
+                                    HttpEntity he = hr.getEntity();
 
-                new Thread(new Runnable() {
-                    public void run() {
-                        /* https://www.codepuppet.com/2013/03/26/android-uploading-a-file-to-a-php-server/ */
-                        /* https://gist.github.com/Kieranties/2225346 */
-                        try {
-                            HttpClient hc = new DefaultHttpClient();
-                            HttpPost hp = new HttpPost("http://impact.asu.edu/CSE535Spring18Folder/UploadToServer.php");
-                            File f = new File(DbName);
-                            FileBody fb = new FileBody(f);
-                            MultipartEntity mp = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-                            mp.addPart("uploaded_file", fb);
-                            hp.setEntity(mp);
-                            HttpResponse hr = hc.execute(hp);
-                            HttpEntity he = hr.getEntity();
+                                    if (hr != null) {
+                                        Log.d(TAG1, "Response received");
+                                        Log.d(TAG1, hr.getStatusLine().getReasonPhrase() + " " + hr.getStatusLine().getStatusCode());
+                                        String messageText = EntityUtils.toString(he);
+                                        Log.d(TAG1, messageText);
+                                        handler.sendMessage(handler.obtainMessage(TOAST, "Response: " + messageText));
+                                    } else {
+                                        handler.sendMessage(handler.obtainMessage(TOAST, "Response not received"));
+                                        Log.d(TAG1, "Response not received");
+                                    }
 
-                            if (hr != null) {
-                                Log.d(TAG1, "Response received");
-                                Log.d(TAG1, hr.getStatusLine().getReasonPhrase() + " " + hr.getStatusLine().getStatusCode());
-                                String messageText = EntityUtils.toString(he);
-                                Log.d(TAG1, messageText);
-                                handler.sendMessage(handler.obtainMessage(TOAST, "Response: " + messageText));
-                            } else {
-                                handler.sendMessage(handler.obtainMessage(TOAST, "Response not received"));
-                                Log.d(TAG1, "Response not received");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    Log.d(TAG1, "Exception caught");
+                                }
                             }
-                            uploadClicked = true;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Log.d(TAG1, "Exception caught");
-                        }
-
+                        }).start();
                     }
-                }).start();
+                    else {
+                        Toast.makeText(getApplicationContext(), "Please enter patient data first", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please save the data first", Toast.LENGTH_LONG).show();
+                }
+                Toast.makeText(getApplicationContext(),"Uploaded Successfully",Toast.LENGTH_LONG).show();
             }
         });
 
@@ -281,8 +296,11 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             @Override
             public void onClick(View v) {
                 if(uploadClicked){
-                    Download_Flag = true;
-                    new Thread(new Runnable() {
+                    /*only if upload is done, it allows download*/
+                    boolean flag = validatePatientInput(pid, age, pname, rg);
+                    if(flag == true) {
+                        Download_Flag = true;
+                        new Thread(new Runnable() {
                         public void run() {
                             try {
                                 HttpClient hc = new DefaultHttpClient();
@@ -312,6 +330,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                             graph.addSeries(series4);
                             graph.addSeries(series5);
                             graph.addSeries(series6);
+                            /*only after downloading the database, the last 10 records are plotted*/
                             if(DownloadFinish) {
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -333,22 +352,24 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                     }).start();
                 }
                 else {
-                    Toast.makeText(getApplicationContext(),"Please UploAD FIRST",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Please enter patient data first", Toast.LENGTH_LONG).show();
+                    }
                 }
+                else {
+                    Toast.makeText(getApplicationContext(), "Please Upload first", Toast.LENGTH_LONG).show();
 
-
-
+                }
             }
         });
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
-
     }
     //https://examples.javacodegeeks.com/android/core/activity/android-timertask-example/
 
     public boolean validatePatientInput(EditText pid, EditText age, EditText pname, RadioGroup rg){
+        /*checks if all the patient data is correctly entered in the required data format*/
         final String str1 = pid.getText().toString().trim();
         final String str2 = age.getText().toString().trim();
         final String str3 = pname.getText().toString().trim();
@@ -362,12 +383,9 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         }
     }
 
-
-
     @Override
     protected void onResume() {
         super.onResume();
-
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -388,7 +406,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                         }
                     }
                     /*
-                     *clears the graph when stop button is pressed
+                     * clears the graph when stop button is pressed
                      * https://stackoverflow.com/questions/15913017/graphview-and-resetdata
                      */
                     if(clear_data) {
@@ -405,84 +423,29 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                             e.printStackTrace();
                         }
                     }
-
                 }
             }
         }).start();
-
         senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
+    /* This function takes the updated accelerometer values and displays on the graph */
     public void updateGraph(){
-        /**
-         * This function takes the updated accelerometer values and displays on the graph
-         *
-         */
-       /* if(Download_Flag == true){
-            Log.d(TAG1, "In IF part of update graph");
-            for(int i = 0; i < 10;i++) {
-                series4.appendData(new DataPoint(lastXd, values.get(i).x_value), true, 1000);
-                series5.appendData(new DataPoint(lastXd, values.get(i).y_value), true, 1000);
-                series6.appendData(new DataPoint(lastXd, values.get(i).z_value), true, 1000);
-                lastXd += 1;
-                System.out.println(values.get(i).x_value);
-                System.out.println(values.get(i).y_value);
-                System.out.println(values.get(i).z_value);
-
-            }
-           //lastXd = 0.0;
-            return;
-        }*/
-        System.out.println("Again plotting original graph");
         series1.appendData(new DataPoint(lastX, last_x), true, 1000);
         series2.appendData(new DataPoint(lastX, last_y), true, 1000);
         series3.appendData(new DataPoint(lastX, last_z), true, 1000);
         lastX += 1;
     }
+
+    /* This function takes the values for the last ten records of downloaded database and displays on the graph */
     public void updateDownloadGraph(List<XYZvalues> values1){
-        Log.d(TAG1, "In update Download graph");
         for(int i = 0; i < values1.size();i++) {
             series4.appendData(new DataPoint(lastXd, values.get(i).x_value), true, 1000);
             series5.appendData(new DataPoint(lastXd, values.get(i).y_value), true, 1000);
             series6.appendData(new DataPoint(lastXd, values.get(i).z_value), true, 1000);
             lastXd += 1;
-            System.out.println(values.get(i).x_value);
-            System.out.println(values.get(i).y_value);
-            System.out.println(values.get(i).z_value);
-
         }
-
     }
-
-
-    //https://www.androidhive.info/2011/11/android-sqlite-database-tutorial/
-    //to read from downloaded databases
-
-    /*public void ReadData(){
-        values = new ArrayList<XYZvalues>();
-        String DbName =Environment.getExternalStorageDirectory().getAbsolutePath()
-                + "/Android/Data/CSE535_ASSIGNMENT2_DOWN/Group5db.db";
-        SQLiteDatabase db1 = SQLiteDatabase.openDatabase(DbName,null,SQLiteDatabase.NO_LOCALIZED_COLLATORS|SQLiteDatabase.OPEN_READWRITE);
-        String Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
-        Log.d(TAG1, "Downloaded Db opened");
-        Cursor cursor = db1.rawQuery("SELECT * FROM Srinija_520_23_Male LIMIT 10 OFFSET (SELECT COUNT(*) FROM Srinija_520_23_Male)-10", null);
-        Log.d(TAG1,"Query reading");
-        if(cursor.moveToFirst()) {
-            do {
-                XYZvalues xyz_value = new XYZvalues();
-                xyz_value.x_value = cursor.getFloat(1);
-                xyz_value.y_value = cursor.getFloat(2);
-                xyz_value.z_value = cursor.getFloat(3);
-                values.add(xyz_value);
-                Log.d(TAG1, "appending to the array list");
-            } while (cursor.moveToNext());
-        }
-    }*/
-
-    /**
-     * Back button listener.
-     * https://stackoverflow.com/questions/2354336/android-pressing-back-button-should-exit-the-app
-     */
 
     @Override
     public void onBackPressed()
@@ -502,13 +465,14 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
-
         if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
             boolean flag = validatePatientInput(pid, age, pname, rg);
             long curTime = System.currentTimeMillis();
+
+            /*get the data for every 1 second*/
             if ((curTime - lastUpdate) > 995) {
                 if (DataBaseFlag == true)
                 Db1.AddData(curTime,x,y,z,str1,str2,str3,str4);
