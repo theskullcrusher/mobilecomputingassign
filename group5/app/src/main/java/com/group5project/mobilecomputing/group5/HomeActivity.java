@@ -79,7 +79,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private Button stop;
     private Button save;
     private Button upload;
-    private boolean uploadClicked = false;
+    private boolean uploadFinish = false;
     private Button download;
     private RadioButton maleButton;
     private RadioButton femaleButton;
@@ -185,10 +185,10 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         series6.setColor(Color.BLUE);
         Viewport viewport = graph.getViewport();
         viewport.setYAxisBoundsManual(true);
-        viewport.setMinY(0.0);
-        viewport.setMaxY(20.0);
+        viewport.setMinY(-10.0);
+        viewport.setMaxY(30.0);
         viewport.setMinX(0.0);
-        viewport.setMaxX(10.0);
+        viewport.setMaxX(15.0);
         viewport.setScalable(true);
         viewport.setScrollable(true);
 
@@ -267,28 +267,38 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                                 String messageText = EntityUtils.toString(he);
                                 Log.d(TAG1, messageText);
                                 handler.sendMessage(handler.obtainMessage(TOAST, "Response: " + messageText));
+                                uploadFinish = true;
                             } else {
                                 handler.sendMessage(handler.obtainMessage(TOAST, "Response not received"));
                                 Log.d(TAG1, "Response not received");
                             }
-                            uploadClicked = true;
                         } catch (IOException e) {
                             e.printStackTrace();
                             Log.d(TAG1, "Exception caught");
-                            uploadClicked = false;
+                        }
+                        if(uploadFinish) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), "Successfully Uploaded Database", Toast.LENGTH_LONG).show();
+                                    uploadFinish = false;
+                                }
+                            });
                         }
 
                     }
                 }).start();
+
             }
         });
 
         download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(uploadClicked){
                     Download_Flag = true;
-                    new Thread(new Runnable() {
+                    download.setClickable(false);
+                    DownloadFinish = false;
+                new Thread(new Runnable() {
                         public void run() {
                             try {
                                 HttpClient hc = new DefaultHttpClient();
@@ -313,20 +323,17 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                             Table_Name = str1+"_"+str2+"_"+str3+"_"+str4;
                             values = Db2.readData(Table_Name);
                             Log.d(TAG1,"Reading data from downloaded database");
-                            DownloadFinish = true;
                             graph.removeAllSeries();
                             graph.addSeries(series4);
                             graph.addSeries(series5);
                             graph.addSeries(series6);
                             /*only after downloading the database, the last 10 records are plotted*/
-                            if(DownloadFinish) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         Toast.makeText(getApplicationContext(),"Successfully Downloaded Database",Toast.LENGTH_LONG).show();
                                         updateDownloadGraph(values);
                                         run_flag = false;
-                                        DownloadFinish = false;
                                     }
                                 });
                                 //Sleep for short time to show updates on screen
@@ -335,17 +342,11 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
+                            DownloadFinish = true;
                             }
-                        }
+
                     }).start();
                 }
-                else {
-                    Toast.makeText(getApplicationContext(),"Please UploAD FIRST",Toast.LENGTH_LONG).show();
-                }
-
-
-
-            }
         });
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -380,6 +381,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             @Override
             public void run() {
                 while (true) {
+
                     //keeps updating and drawing the graph when run button is pressed
                     while (run_flag) {
                         runOnUiThread(new Runnable() {
@@ -413,6 +415,9 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                             e.printStackTrace();
                         }
                     }
+                    if(DownloadFinish){
+                        download.setClickable(true);
+                    }
 
                 }
             }
@@ -423,7 +428,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
 
     /* This function takes the updated accelerometer values and displays on the graph */
     public void updateGraph(){
- );
         series1.appendData(new DataPoint(lastX, last_x), true, 1000);
         series2.appendData(new DataPoint(lastX, last_y), true, 1000);
         series3.appendData(new DataPoint(lastX, last_z), true, 1000);
