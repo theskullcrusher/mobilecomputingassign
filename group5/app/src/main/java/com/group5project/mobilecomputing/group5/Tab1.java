@@ -4,23 +4,55 @@ package com.group5project.mobilecomputing.group5;
  * Created by srinija on 3/31/18.
  */
 
+import android.content.pm.ActivityInfo;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.group5project.mobilecomputing.group5.R;
 
-public class Tab1 extends Fragment{
+public class Tab1 extends Fragment {
 
     //Collect data for the activities
 
+    public int counter;
+    private Button startTimerButton;
+    private TextView timerText;
+    private RadioButton walk_radio;
+    private RadioButton run_radio;
+    private RadioButton jump_radio;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab1, container, false);
+        startTimerButton = (Button)rootView.findViewById(R.id.startTimerButton);
+        timerText = (TextView) rootView.findViewById(R.id.timerText);
+        walk_radio = (RadioButton)rootView.findViewById(R.id.walk_radio);
+        run_radio = (RadioButton)rootView.findViewById(R.id.run_radio);
+        jump_radio = (RadioButton)rootView.findViewById(R.id.jump_radio);
+        startTimerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                counter = 5;
+                new CountDownTimer(6000, 1000) {
+                    public void onTick(long millisUntilFinished) {
+                        timerText.setText(String.valueOf(counter));
+                        counter--;
+                    }
+
+                    public void onFinish() {
+                        timerText.setText("FINISH!!");
+                    }
+                }.start();
+            }
+        });
         return rootView;
     }
 }

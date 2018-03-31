@@ -6,18 +6,118 @@
     android:layout_height="match_parent"
     tools:context="com.group5project.mobilecomputing.group5.HomeActivity$PlaceholderFragment">
 
+    <LinearLayout
+        android:id="@+id/ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp">
+    <LinearLayout
+        android:id="@+id/ll1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp">
+
+        <TextView
+            android:id="@+id/section_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Activity:"
+            android:textColor="@color/colorPrimary"
+            android:textSize="27sp"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintTop_creator="1"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp">
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioButton
+        android:id="@+id/walk_radio"
+        android:layout_width="143dp"
+        android:layout_height="40dp"
+        android:text="Walking"
+        android:textSize="24sp"
+        tools:layout_editor_absoluteX="27dp"
+        tools:layout_editor_absoluteY="70dp" />
+
+    <RadioButton
+        android:id="@+id/run_radio"
+        android:layout_width="135dp"
+        android:layout_height="46dp"
+        android:text="Running"
+        android:textSize="24sp"
+        tools:layout_editor_absoluteX="27dp"
+        tools:layout_editor_absoluteY="117dp" />
+
+    <RadioButton
+        android:id="@+id/jump_radio"
+        android:layout_width="143dp"
+        android:layout_height="39dp"
+        android:text="Jumping"
+        android:textSize="24sp"
+        tools:layout_editor_absoluteX="27dp"
+        tools:layout_editor_absoluteY="166dp" />
+    </RadioGroup>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="20dp">
     <TextView
-        android:id="@+id/section_label"
+        android:id="@+id/timerTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="This is where we add the 5 sec timer and start button (Tab1.java)"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/constraintLayout"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintTop_creator="1" />
+        android:text="Timer:"
+        android:textColor="@color/colorPrimary"
+        android:textSize="27sp"
+        tools:layout_editor_absoluteX="27dp"
+        tools:layout_editor_absoluteY="227dp" />
+
+        <TextView
+            android:id="@+id/timerText"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/startTimerButton"
+            android:layout_centerHorizontal="true"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="35sp"
+            tools:layout_editor_absoluteX="145dp"
+            tools:layout_editor_absoluteY="227dp" />
+    </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll4"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:layout_margin="10dp">
+
+            <Button
+                android:id="@+id/startTimerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:text="START TIMER"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                tools:layout_editor_absoluteX="103dp"
+                tools:layout_editor_absoluteY="318dp" />
+        </LinearLayout>
+    </LinearLayout>
+
 
 </android.support.constraint.ConstraintLayout>

@@ -18,8 +18,7 @@ public class Tab2 extends Fragment{
     //SVM
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab2, container, false);
         return rootView;
     }
