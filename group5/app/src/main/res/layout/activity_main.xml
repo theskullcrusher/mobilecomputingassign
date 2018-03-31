@@ -12,7 +12,7 @@
         android:id="@+id/tv1"
         android:layout_width="wrap_content"
         android:layout_height="300sp"
-        android:text="Welcome to CSE535 (MC) G5 Assignments 1-2"
+        android:text="Welcome to CSE535 (MC) G5 Assignment 3"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
         android:textColor="#ff0000"
         android:layout_margin="10sp"
