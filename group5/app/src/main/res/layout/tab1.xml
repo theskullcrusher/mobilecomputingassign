@@ -42,14 +42,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
         <RadioButton
-        android:id="@+id/walk_radio"
-        android:layout_width="143dp"
-        android:layout_height="40dp"
-        android:text="Walking"
-        android:textSize="24sp"
-        tools:layout_editor_absoluteX="27dp"
-        tools:layout_editor_absoluteY="70dp" />
+            android:id="@+id/walk_radio"
+            android:layout_width="143dp"
+            android:layout_height="40dp"
+            android:checked="false"
+            android:text="Walking"
+            android:textSize="24sp"
+            tools:layout_editor_absoluteX="27dp"
+            tools:layout_editor_absoluteY="70dp" />
 
     <RadioButton
         android:id="@+id/run_radio"
@@ -116,8 +118,47 @@
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 tools:layout_editor_absoluteX="103dp"
                 tools:layout_editor_absoluteY="318dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll5"
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:layout_margin="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/countText1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimary"
+                android:textSize="17sp"
+                tools:layout_editor_absoluteX="27dp"
+                tools:layout_editor_absoluteY="227dp" />
+
+            <TextView
+                android:id="@+id/countText2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimary"
+                android:textSize="17sp"
+                tools:layout_editor_absoluteX="27dp"
+                tools:layout_editor_absoluteY="227dp" />
+
+            <TextView
+                android:id="@+id/countText3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimary"
+                android:textSize="17sp"
+                tools:layout_editor_absoluteX="27dp"
+                tools:layout_editor_absoluteY="227dp" />
+
         </LinearLayout>
     </LinearLayout>
+
+
 
 
 </android.support.constraint.ConstraintLayout>

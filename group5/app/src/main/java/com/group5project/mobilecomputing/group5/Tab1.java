@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.group5project.mobilecomputing.group5.R;
@@ -22,12 +23,18 @@ public class Tab1 extends Fragment {
 
     //Collect data for the activities
 
-    public int counter;
+    public int timer;
     private Button startTimerButton;
     private TextView timerText;
+    private TextView countText1;
+    private TextView countText2;
+    private TextView countText3;
     private RadioButton walk_radio;
     private RadioButton run_radio;
     private RadioButton jump_radio;
+    private RadioGroup rg;
+    String activityName;
+    int activityCount[] = new int[3];
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,17 +44,59 @@ public class Tab1 extends Fragment {
         walk_radio = (RadioButton)rootView.findViewById(R.id.walk_radio);
         run_radio = (RadioButton)rootView.findViewById(R.id.run_radio);
         jump_radio = (RadioButton)rootView.findViewById(R.id.jump_radio);
+        countText1 = (TextView)rootView.findViewById(R.id.countText1);
+        countText2 = (TextView)rootView.findViewById(R.id.countText2);
+        countText3 = (TextView)rootView.findViewById(R.id.countText3);
+        activityCount[0] = 20;
+        activityCount[1] = 20;
+        activityCount[2] = 20;
+
         startTimerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                counter = 5;
+                timer = 5;
                 new CountDownTimer(6000, 1000) {
                     public void onTick(long millisUntilFinished) {
-                        timerText.setText(String.valueOf(counter));
-                        counter--;
+                        timerText.setText(String.valueOf(timer));
+                        timer--;
                     }
-
                     public void onFinish() {
+                        if(walk_radio.isChecked()) {
+                            activityName = "Walking";
+                            walk_radio.setChecked(false);
+                        }
+                        else if(run_radio.isChecked()){
+                            activityName = "Running";
+                            run_radio.setChecked(false);
+                        }
+                        else if (jump_radio.isChecked()) {
+                            activityName = "Jumping";
+                            jump_radio.setChecked(false);
+                        }
+                        if(activityName == "Walking"){
+                            if(activityName == "Walking"){
+                                activityCount[0]--;
+                                countText1.setText("Remaining count for Walking: "+String.valueOf(activityCount[0]));
+                                countText2.setText("Remaining count for Running: "+String.valueOf(activityCount[1]));
+                                countText3.setText("Remaining count for Jumping: "+String.valueOf(activityCount[2]));
+                            }
+                        }
+                        if(activityName == "Running"){
+                            if(activityName == "Running"){
+                                activityCount[1]--;
+                                countText1.setText("Remaining count for Walking: "+String.valueOf(activityCount[0]));
+                                countText2.setText("Remaining count for Running: "+String.valueOf(activityCount[1]));
+                                countText3.setText("Remaining count for Jumping: "+String.valueOf(activityCount[2]));
+                            }
+                        }
+                        if(activityName == "Jumping"){
+                            if(activityName == "Jumping"){
+                                activityCount[2]--;
+                                countText1.setText("Remaining count for Walking: "+String.valueOf(activityCount[0]));
+                                countText2.setText("Remaining count for Running: "+String.valueOf(activityCount[1]));
+                                countText3.setText("Remaining count for Jumping: "+String.valueOf(activityCount[2]));
+                            }
+                        }
                         timerText.setText("FINISH!!");
                     }
                 }.start();
