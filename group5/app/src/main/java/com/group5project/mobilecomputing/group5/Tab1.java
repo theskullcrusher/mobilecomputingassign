@@ -16,12 +16,21 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+//sensor event headers
+import android.hardware.SensorEventListener;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
+import android.content.Context;
+import java.lang.Object;
+import java.lang.String;
+//database headers
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import com.group5project.mobilecomputing.group5.R;
 
-public class Tab1 extends Fragment {
-
-    //Collect data for the activities
+public class Tab1 extends Fragment implements SensorEventListener {
 
     public int timer;
     private Button startTimerButton;
@@ -35,6 +44,12 @@ public class Tab1 extends Fragment {
     private RadioGroup rg;
     String activityName;
     int activityCount[] = new int[3];
+    //sensor variables
+    private SensorManager senSensorManager;
+    private Sensor senAccelerometer;
+
+    private long lastUpdate = 0;
+    MyDatabase Db1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,6 +62,8 @@ public class Tab1 extends Fragment {
         countText1 = (TextView)rootView.findViewById(R.id.countText1);
         countText2 = (TextView)rootView.findViewById(R.id.countText2);
         countText3 = (TextView)rootView.findViewById(R.id.countText3);
+        senSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         activityCount[0] = 20;
         activityCount[1] = 20;
         activityCount[2] = 20;
@@ -99,10 +116,39 @@ public class Tab1 extends Fragment {
                         }
                         timerText.setText("FINISH!!");
                     }
+
                 }.start();
+
             }
         });
+
+        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         return rootView;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        Sensor mySensor = sensorEvent.sensor;
+        if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = sensorEvent.values[0];
+            float y = sensorEvent.values[1];
+            float z = sensorEvent.values[2];
+            long curTime = System.currentTimeMillis();
+
+            /*get the data for every 1 second*/
+            if ((curTime - lastUpdate) > 95) {
+                if (DataBaseFlag == true)
+                    Db1.AddData(curTime,x,y,z);
+                long diffTime = (curTime - lastUpdate);
+                lastUpdate = curTime;
+            }
+        }
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
     }
 }
 
@@ -570,25 +616,7 @@ public class Tab1 extends Fragment {
 //
 //    @Override
 //    public void onSensorChanged(SensorEvent sensorEvent) {
-//        Sensor mySensor = sensorEvent.sensor;
-//        if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-//            float x = sensorEvent.values[0];
-//            float y = sensorEvent.values[1];
-//            float z = sensorEvent.values[2];
-//            boolean flag = validatePatientInput(pid, age, pname, rg);
-//            long curTime = System.currentTimeMillis();
 //
-//            /*get the data for every 1 second*/
-//            if ((curTime - lastUpdate) > 995) {
-//                if (DataBaseFlag == true)
-//                    Db1.AddData(curTime,x,y,z,str1,str2,str3,str4);
-//                long diffTime = (curTime - lastUpdate);
-//                lastUpdate = curTime;
-//                last_x = x;
-//                last_y = y;
-//                last_z = z;
-//            }
-//        }
 //    }
 //
 //    @Override

@@ -25,6 +25,7 @@ public class MyDatabase extends SQLiteOpenHelper {
     public static final String DbName = Environment.getExternalStorageDirectory().getAbsolutePath()
             + "/Android/Data/CSE535_Assignment2/Group5db.db";
     public static final String TAG = MyDatabase.class.getCanonicalName();
+    public String str1="Activity string,";
 
     MyDatabase(Context context) {
         super(context, DbName, null, 1);
@@ -53,28 +54,45 @@ public class MyDatabase extends SQLiteOpenHelper {
 
     }
 
-    public void data(String str1, String str2, String str3, String str4) {
+    public void data() {
         Log.d(TAG, "In Db method");
-        String tableName = str1 + "_" + str2 + "_" + str3 + "_" + str4;
+        String tableName = "Activity Database";
         SQLiteDatabase db1 = this.getWritableDatabase();
-        db1.execSQL("create table if not exists " + tableName + " ("
-                + "timestamp long, "
-                + "x_values float, "
-                + "y_values float, "
-                + "z_values float); ");
+        for(int i=1; i<=50; i++) {
+            for (int j = 1; j <= 3; j++) {
+                if(j==1)
+                    str1 = str1 + "AccelX" + Integer.toString(i) + " " + "float,";
+                else if (j==2)
+                    str1 = str1 + "AccelY" + Integer.toString(i) + " " + "float,";
+                else if (j==3)
+                    str1 = str1 + "AccelZ" + Integer.toString(i) + " " + "float,";
+
+
+            }
+        }
+        db1.execSQL("create table if not exists " + tableName + str1);
     }
     /*https://stackoverflow.com/questions/42619923/how-to-insert-multiple-rows-into-sqlite-android*/
 
-    public void AddData(long time, float x, float y, float z, String str1, String str2, String str3, String str4) {
+    public void AddData(float values[], String str) {
         Log.d(TAG, "In insert row method");
-        String tableName2 = str1 + "_" + str2 + "_" + str3 + "_" + str4;
+        String tableName2 = str1;
         SQLiteDatabase db1 = this.getWritableDatabase();
         ContentValues tableContents = new ContentValues();
-        tableContents.put("timestamp", time);
-        tableContents.put("x_values", x);
-        tableContents.put("y_values", y);
-        tableContents.put("z_values", z);
-        //to insert a row
+        tableContents.put("Activity", str);
+        for(int i=1; i<=50; i++) {
+            for (int j = 1; j <= 3; j++) {
+                if(j==1)
+                    tableContents.put("AccelX"+ Integer.toString(i), values[3*(i-1)+j-1]);
+                else if (j==2)
+                    tableContents.put("AccelY"+ Integer.toString(i), values[3*(i-1)+j-1]);
+                else if (j==3)
+                    tableContents.put("AccelZ"+ Integer.toString(i), values[3*(i-1)+j-1]);
+
+
+            }
+        }
+
         db1.insert(tableName2, null, tableContents);
         db1.close();
 
