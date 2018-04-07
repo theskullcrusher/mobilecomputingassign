@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +31,11 @@ import android.database.sqlite.SQLiteException;
 
 import com.group5project.mobilecomputing.group5.R;
 
+import static java.sql.DriverManager.println;
+
 public class Tab1 extends Fragment implements SensorEventListener {
 
+    private static final String TAG = Tab1.class.getCanonicalName() ;
     public int timer;
     private Button startTimerButton;
     private TextView timerText;
@@ -42,8 +46,12 @@ public class Tab1 extends Fragment implements SensorEventListener {
     private RadioButton run_radio;
     private RadioButton jump_radio;
     private RadioGroup rg;
+    private Boolean TimerFlag = false;
+    String activity = "Activity";
+    private static int i=0;
     String activityName;
     int activityCount[] = new int[3];
+    float[] xyz_values = new float[200];
     //sensor variables
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
@@ -62,95 +70,137 @@ public class Tab1 extends Fragment implements SensorEventListener {
         countText1 = (TextView)rootView.findViewById(R.id.countText1);
         countText2 = (TextView)rootView.findViewById(R.id.countText2);
         countText3 = (TextView)rootView.findViewById(R.id.countText3);
+        Db1 = new MyDatabase(getActivity());
+        Db1.data();
         senSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         activityCount[0] = 20;
         activityCount[1] = 20;
         activityCount[2] = 20;
-
-        startTimerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                timer = 5;
-                new CountDownTimer(6000, 1000) {
-                    public void onTick(long millisUntilFinished) {
-                        timerText.setText(String.valueOf(timer));
-                        timer--;
-                    }
-                    public void onFinish() {
-                        if(walk_radio.isChecked()) {
-                            activityName = "Walking";
-                            walk_radio.setChecked(false);
-                        }
-                        else if(run_radio.isChecked()){
-                            activityName = "Running";
-                            run_radio.setChecked(false);
-                        }
-                        else if (jump_radio.isChecked()) {
-                            activityName = "Jumping";
-                            jump_radio.setChecked(false);
-                        }
-                        if(activityName == "Walking"){
-                            if(activityName == "Walking"){
-                                activityCount[0]--;
-                                countText1.setText("Remaining count for Walking: "+String.valueOf(activityCount[0]));
-                                countText2.setText("Remaining count for Running: "+String.valueOf(activityCount[1]));
-                                countText3.setText("Remaining count for Jumping: "+String.valueOf(activityCount[2]));
-                            }
-                        }
-                        if(activityName == "Running"){
-                            if(activityName == "Running"){
-                                activityCount[1]--;
-                                countText1.setText("Remaining count for Walking: "+String.valueOf(activityCount[0]));
-                                countText2.setText("Remaining count for Running: "+String.valueOf(activityCount[1]));
-                                countText3.setText("Remaining count for Jumping: "+String.valueOf(activityCount[2]));
-                            }
-                        }
-                        if(activityName == "Jumping"){
-                            if(activityName == "Jumping"){
-                                activityCount[2]--;
-                                countText1.setText("Remaining count for Walking: "+String.valueOf(activityCount[0]));
-                                countText2.setText("Remaining count for Running: "+String.valueOf(activityCount[1]));
-                                countText3.setText("Remaining count for Jumping: "+String.valueOf(activityCount[2]));
-                            }
-                        }
-                        timerText.setText("FINISH!!");
-                    }
-
-                }.start();
-
-            }
-        });
-
         senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         return rootView;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        new Thread(new Runnable() {
+            public void run() {
+                while (true){
+                    ReadValues();
+                }
+            }
+
+        }).start();
+        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
+        Boolean activityChecked = walk_radio.isChecked()|| run_radio.isChecked()||jump_radio.isChecked();
         if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
             long curTime = System.currentTimeMillis();
 
-            /*get the data for every 1 second*/
-            if ((curTime - lastUpdate) > 95) {
-                if (DataBaseFlag == true)
-                    Db1.AddData(curTime,x,y,z);
-                long diffTime = (curTime - lastUpdate);
+            /*get the data for every 0.1 second*/
+
+            if ((curTime - lastUpdate) > 100 && activityChecked && i< 149 ) {
+                    xyz_values[i] = x;
+                    i++;
+                    xyz_values[i]=y;
+                    i++;
+                    xyz_values[i]=z;
+                    i++;
                 lastUpdate = curTime;
             }
         }
-
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
     }
+
+    public void ReadValues(){
+        if (i > 149) {
+            if (walk_radio.isChecked()) {
+                activity = "walking";
+                if (activityCount[0] > 0) {
+                    activityCount[0]= activityCount[0]-1;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
+                            countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
+                            countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
+                        }
+                    });
+                    Db1.AddData(xyz_values, activity);
+                    i = 0;
+                } else{
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            walk_radio.setChecked(false);
+                        }
+                    });
+                }
+
+            } else if (run_radio.isChecked()) {
+                activity = "running";
+                if (activityCount[1] > 0) {
+                    activityCount[1]--;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
+                            countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
+                            countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
+                        }
+                    });
+                    Db1.AddData(xyz_values, activity);
+                    i = 0;
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            run_radio.setChecked(false);
+                        }
+                    });
+                }
+            }
+            else if (jump_radio.isChecked()) {
+                activity = "jumping";
+                if (activityCount[2] > 0) {
+                    activityCount[2]--;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
+                            countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
+                            countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
+                        }
+                    });
+                    Db1.AddData(xyz_values, activity);
+                    i = 0;
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            jump_radio.setChecked(false);
+                        }
+                    });
+                }
+            }
+        }
+
+    }
+
 }
+
+
 
 //Original HomeActivity.java
 //package com.group5project.mobilecomputing.group5;

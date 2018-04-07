@@ -52,6 +52,11 @@ public class HomeActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
     }
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+    }
 
 
     //@Override
@@ -115,4 +120,5 @@ public class HomeActivity extends AppCompatActivity {
             return 3;
         }
     }
+
 }

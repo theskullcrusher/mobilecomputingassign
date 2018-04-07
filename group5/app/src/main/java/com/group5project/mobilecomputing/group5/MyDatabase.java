@@ -25,7 +25,7 @@ public class MyDatabase extends SQLiteOpenHelper {
     public static final String DbName = Environment.getExternalStorageDirectory().getAbsolutePath()
             + "/Android/Data/CSE535_Assignment2/Group5db.db";
     public static final String TAG = MyDatabase.class.getCanonicalName();
-    public String str1="Activity string,";
+    public String str1="Activity string, ";
 
     MyDatabase(Context context) {
         super(context, DbName, null, 1);
@@ -56,29 +56,39 @@ public class MyDatabase extends SQLiteOpenHelper {
 
     public void data() {
         Log.d(TAG, "In Db method");
-        String tableName = "Activity Database";
+        String tableName = "Activity_Database";
         SQLiteDatabase db1 = this.getWritableDatabase();
         for(int i=1; i<=50; i++) {
             for (int j = 1; j <= 3; j++) {
-                if(j==1)
-                    str1 = str1 + "AccelX" + Integer.toString(i) + " " + "float,";
-                else if (j==2)
-                    str1 = str1 + "AccelY" + Integer.toString(i) + " " + "float,";
-                else if (j==3)
-                    str1 = str1 + "AccelZ" + Integer.toString(i) + " " + "float,";
+                if(j==1) {
+                        str1 = str1 + "AccelX" + Integer.toString(i) + " " + "float, ";
+                }
+                else if (j==2) {
+                        str1 = str1 + "AccelY" + Integer.toString(i) + " " + "float, ";
+                }
+                else if (j==3) {
+                    if (i == 50)
+                        str1 = str1 + "AccelZ" + Integer.toString(i) + " " + "float ";
+                    else
+                        str1 = str1 + "AccelZ" + Integer.toString(i) + " " + "float, ";
 
-
+                }
             }
         }
-        db1.execSQL("create table if not exists " + tableName + str1);
+        Log.d(TAG, "Creating table");
+        db1.execSQL("create table if not exists " + tableName + "(" + str1 + ");");
+        Log.d(TAG, "table created");
     }
     /*https://stackoverflow.com/questions/42619923/how-to-insert-multiple-rows-into-sqlite-android*/
 
     public void AddData(float values[], String str) {
         Log.d(TAG, "In insert row method");
-        String tableName2 = str1;
+        String tableName2 = "Activity_Database";
         SQLiteDatabase db1 = this.getWritableDatabase();
         ContentValues tableContents = new ContentValues();
+        //for(int i=0; i<150; i++){
+           // Log.d(TAG, "for loop" + Float.toString(values[i]));
+        //}
         tableContents.put("Activity", str);
         for(int i=1; i<=50; i++) {
             for (int j = 1; j <= 3; j++) {
