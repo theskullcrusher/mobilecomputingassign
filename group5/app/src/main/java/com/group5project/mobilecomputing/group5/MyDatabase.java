@@ -86,25 +86,22 @@ public class MyDatabase extends SQLiteOpenHelper {
         String tableName2 = "Activity_Database";
         SQLiteDatabase db1 = this.getWritableDatabase();
         ContentValues tableContents = new ContentValues();
-        //for(int i=0; i<150; i++){
-           // Log.d(TAG, "for loop" + Float.toString(values[i]));
-        //}
-        tableContents.put("Activity", str);
-        for(int i=1; i<=50; i++) {
-            for (int j = 1; j <= 3; j++) {
-                if(j==1)
-                    tableContents.put("AccelX"+ Integer.toString(i), values[3*(i-1)+j-1]);
-                else if (j==2)
-                    tableContents.put("AccelY"+ Integer.toString(i), values[3*(i-1)+j-1]);
-                else if (j==3)
-                    tableContents.put("AccelZ"+ Integer.toString(i), values[3*(i-1)+j-1]);
+            tableContents.put("Activity", str);
+            for (int i = 1; i <= 50; i++) {
+                for (int j = 1; j <= 3; j++) {
+                    if (j == 1)
+                        tableContents.put("AccelX" + Integer.toString(i), values[3 * (i - 1) + j - 1]);
+                    else if (j == 2)
+                        tableContents.put("AccelY" + Integer.toString(i), values[3 * (i - 1) + j - 1]);
+                    else if (j == 3)
+                        tableContents.put("AccelZ" + Integer.toString(i), values[3 * (i - 1) + j - 1]);
 
 
+                }
             }
-        }
 
-        db1.insert(tableName2, null, tableContents);
-        db1.close();
+            db1.insert(tableName2, null, tableContents);
+
 
     }
 
