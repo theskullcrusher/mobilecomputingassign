@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -24,6 +25,7 @@ public class HomeActivity extends AppCompatActivity {
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
+    private static final String TAG = Tab1.class.getCanonicalName();
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     /**
@@ -50,6 +52,9 @@ public class HomeActivity extends AppCompatActivity {
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+        int id = android.os.Process.myPid();
+        Log.d(TAG, "in onResume method " + Integer.toString(id));
 
     }
     @Override

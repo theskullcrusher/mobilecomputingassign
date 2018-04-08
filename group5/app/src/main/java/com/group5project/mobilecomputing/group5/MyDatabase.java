@@ -101,6 +101,8 @@ public class MyDatabase extends SQLiteOpenHelper {
             }
 
             db1.insert(tableName2, null, tableContents);
+        int id = android.os.Process.myTid();
+        Log.d(TAG, "in myDatabase " + Integer.toString(id));
 
 
     }

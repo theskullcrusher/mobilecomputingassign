@@ -49,12 +49,14 @@ public class Tab1 extends Fragment implements SensorEventListener {
     private Boolean TimerFlag = false;
     String activity = "Activity";
     private static int i=0;
+    private static int r=0;
     String activityName;
     int activityCount[] = new int[3];
     float[] xyz_values = new float[200];
     //sensor variables
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
+    private int PostedtoUiFlag =0;
 
     private long lastUpdate = 0;
     MyDatabase Db1;
@@ -77,22 +79,22 @@ public class Tab1 extends Fragment implements SensorEventListener {
         activityCount[0] = 20;
         activityCount[1] = 20;
         activityCount[2] = 20;
-        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        return rootView;
-    }
-    @Override
-    public void onResume() {
-        super.onResume();
+
         new Thread(new Runnable() {
             public void run() {
+                int id1 = android.os.Process.myTid();
+                Log.d(TAG, "in onResume method " + Integer.toString(id1));
                 while (true){
                     ReadValues();
                 }
             }
 
         }).start();
-        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        return rootView;
+
     }
+
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
@@ -106,13 +108,15 @@ public class Tab1 extends Fragment implements SensorEventListener {
 
             /*get the data for every 0.1 second*/
 
-            if ((curTime - lastUpdate) > 100 && activityChecked && i< 149 ) {
+            if ((curTime - lastUpdate) > 100  && activityChecked && i< 149 ) {
                     xyz_values[i] = x;
                     i++;
                     xyz_values[i]=y;
                     i++;
                     xyz_values[i]=z;
                     i++;
+                int id = android.os.Process.myPid();
+                //Log.d(TAG, "on sensor changed " + Integer.toString(id));
                 lastUpdate = curTime;
             }
         }
@@ -123,12 +127,14 @@ public class Tab1 extends Fragment implements SensorEventListener {
 
     }
 
-    public void ReadValues(){
+    public void ReadValues() {
         if (i > 149) {
+            int id = android.os.Process.myTid();
+            Log.d(TAG, "in myDatabase " + Integer.toString(id));
             if (walk_radio.isChecked()) {
                 activity = "walking";
                 if (activityCount[0] > 0) {
-                    activityCount[0]= activityCount[0]-1;
+                    activityCount[0]--;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -139,7 +145,8 @@ public class Tab1 extends Fragment implements SensorEventListener {
                     });
                     Db1.AddData(xyz_values, activity);
                     i = 0;
-                } else{
+                }
+               else {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -147,58 +154,55 @@ public class Tab1 extends Fragment implements SensorEventListener {
                         }
                     });
                 }
-
             } else if (run_radio.isChecked()) {
-                activity = "running";
-                if (activityCount[1] > 0) {
-                    activityCount[1]--;
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
-                            countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
-                            countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
-                        }
-                    });
-                    Db1.AddData(xyz_values, activity);
-                    i = 0;
-                } else {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            run_radio.setChecked(false);
-                        }
-                    });
-                }
+            activity = "running";
+            if (activityCount[1] > 0) {
+                activityCount[1]--;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
+                        countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
+                        countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
+                    }
+                });
+                Db1.AddData(xyz_values, activity);
+                i = 0;
+            } else {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        run_radio.setChecked(false);
+                    }
+                });
             }
-            else if (jump_radio.isChecked()) {
-                activity = "jumping";
-                if (activityCount[2] > 0) {
-                    activityCount[2]--;
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
-                            countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
-                            countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
-                        }
-                    });
-                    Db1.AddData(xyz_values, activity);
-                    i = 0;
-                } else {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            jump_radio.setChecked(false);
-                        }
-                    });
-                }
+        } else if (jump_radio.isChecked()) {
+            activity = "jumping";
+            if (activityCount[2] > 0) {
+                activityCount[2]--;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
+                        countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
+                        countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
+                    }
+                });
+                Db1.AddData(xyz_values, activity);
+                i = 0;
+            } else {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        jump_radio.setChecked(false);
+                    }
+                });
+               }
             }
         }
-
     }
-
 }
+
 
 
 
