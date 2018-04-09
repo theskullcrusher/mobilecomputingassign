@@ -108,29 +108,31 @@ public class MyDatabase extends SQLiteOpenHelper {
     }
 
     //https://www.androidhive.info/2011/11/android-sqlite-database-tutorial/
-    public List<XYZvalues> readData(String Table_Name) {
-        List<XYZvalues> values;
-        values = new ArrayList<XYZvalues>();
+    public ArrayList<DbReturnObject> readData(String Table_Name) {
         int i = 0;
         SQLiteDatabase db2 = this.getReadableDatabase();
+        ArrayList<DbReturnObject> db_list = new ArrayList<DbReturnObject>();
         try {
-            Cursor cursor = db2.rawQuery("SELECT * FROM " + Table_Name + " ORDER BY TIMESTAMP DESC", null);
-            String countQuery = "SELECT  * FROM " + Table_Name;
-            Cursor cursor1 = db2.rawQuery(countQuery, null);
-            int count = cursor1.getCount();
-            cursor1.close();
-
+            Cursor cursor = db2.rawQuery("SELECT * FROM " + Table_Name, null);
+            int count = cursor.getCount();
             if (cursor.moveToFirst()) {
                 do {
-                    XYZvalues xyz_value = new XYZvalues();
-                    xyz_value.x_value = cursor.getFloat(1);
-                    xyz_value.y_value = cursor.getFloat(2);
-                    xyz_value.z_value = cursor.getFloat(3);
-                    values.add(xyz_value);
-                    Log.d(TAG, "appending to the array list");
+                    DbReturnObject dbReturnObject;
+                    String label = cursor.getString(0);
+                    ArrayList<XYZvalues> xyz_list = new ArrayList<XYZvalues>();
+                    for(int j=0;j<150;j+=3){
+                        XYZvalues xyz_value = new XYZvalues();
+                        xyz_value.x_value = cursor.getFloat(j+1);
+                        xyz_value.y_value = cursor.getFloat(j+2);
+                        xyz_value.z_value = cursor.getFloat(j+3);
+                        xyz_list.add(xyz_value);
+                    }
+                    dbReturnObject = new DbReturnObject(label, xyz_list);
+                    db_list.add(dbReturnObject);
+                    Log.d(TAG, "Reading data item:"+String.valueOf(i+1));
                     cursor.moveToNext();
                     i++;
-                } while (i < Math.min(count, 10));
+                } while (i < Math.min(count, 60));
             }
             db2.close();
 
@@ -139,7 +141,7 @@ public class MyDatabase extends SQLiteOpenHelper {
             e.printStackTrace();
             Log.d(TAG, "Exception caught");
         }
-        return values;
+        return db_list;
     }
 }
 

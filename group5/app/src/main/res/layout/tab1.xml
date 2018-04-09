@@ -100,7 +100,7 @@
             tools:layout_editor_absoluteX="145dp"
             tools:layout_editor_absoluteY="227dp" />
     </LinearLayout>
-
+<!--
         <LinearLayout
             android:id="@+id/ll4"
             android:layout_width="match_parent"
@@ -120,7 +120,7 @@
                 tools:layout_editor_absoluteY="318dp" />
 
         </LinearLayout>
-
+-->
         <LinearLayout
             android:id="@+id/ll5"
             android:layout_width="match_parent"
