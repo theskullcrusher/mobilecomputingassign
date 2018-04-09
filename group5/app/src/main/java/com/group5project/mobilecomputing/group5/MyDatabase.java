@@ -23,7 +23,7 @@ package com.group5project.mobilecomputing.group5;
 public class MyDatabase extends SQLiteOpenHelper {
 
     public static final String DbName = Environment.getExternalStorageDirectory().getAbsolutePath()
-            + "/Android/Data/CSE535_Assignment2/Group5db.db";
+            + "/Android/Data/CSE535_ASSIGNMENT3/Group5db.db";
     public static final String TAG = MyDatabase.class.getCanonicalName();
     public String str1="Activity string, ";
 
