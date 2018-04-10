@@ -17,6 +17,24 @@
         tools:layout_editor_absoluteY="0dp">
 
         <LinearLayout
+            android:id="@+id/ll2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:fadingEdgeLength="@dimen/fab_margin"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/holo_red_dark"
+                android:textAlignment="center"
+                android:text="(Please be patient on clicking reload database. It takes 30 sec to preprocess)"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/ll4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,6 +58,15 @@
             android:layout_marginTop="30dp"
             android:orientation="horizontal">
 
+
+            <Button
+                android:id="@+id/bt1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@android:color/holo_green_light"
+                android:text="Reload Database and Run SVM" />
+
+
             <Button
                 android:id="@+id/run1"
                 android:layout_width="match_parent"
@@ -55,6 +82,24 @@
                 android:layout_weight="1"
                 android:backgroundTint="@android:color/holo_red_light"
                 android:text="Stop" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            >
+
+            <TextView
+                android:id="@+id/tv5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/holo_blue_dark"
+                android:textAlignment="center"
+                android:text="Successfully reloaded database and done preprocessing input...\nNow running SVM Classifier...\n"
+                />
+
         </LinearLayout>
 
     </LinearLayout>
