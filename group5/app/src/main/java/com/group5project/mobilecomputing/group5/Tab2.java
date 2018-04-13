@@ -5,9 +5,9 @@ package com.group5project.mobilecomputing.group5;
  */
 
 import android.app.Activity;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +15,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import umich.cse.yctung.androidlibsvm.LibSVM;
-
-
-import com.group5project.mobilecomputing.group5.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,8 +22,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import libsvm.*;
+import umich.cse.yctung.androidlibsvm.LibSVM;
+import umich.cse.yctung.androidlibsvm.LibSVM.*;
 
 public class Tab2 extends Fragment {
 
@@ -47,7 +42,7 @@ public class Tab2 extends Fragment {
     private EditText inputPara;
     private TextView tv;
     private String inputstr = "";
-    LibSVM svm;
+//    LibSVM svm;
     public static final String appFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath()
             + "/Android/Data/CSE535_ASSIGNMENT3/";
     public static final String data_file = "training_data";
@@ -85,6 +80,7 @@ public class Tab2 extends Fragment {
         inputPara = (EditText) rootView.findViewById(R.id.et1);
         final HashMap<Integer, String> hmap = new HashMap<Integer, String>();
         final HashMap<String, Integer> reverse_hmap = new HashMap<String, Integer>();
+
 
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,8 +145,11 @@ public class Tab2 extends Fragment {
                                 inputstr = inputstr.trim() + " ";
                             String path = appFolderPath + data_file;
                             Log.d(TAG, "Program Input SVM: "+path);
-                            svm = LibSVM.getInstance();
-                            svm.train(inputstr + path);
+//                            svm = new LibSVM();
+//                            svm.train(inputstr + path);
+//                            jniSvmTrain(String options);
+                            LibSVM l = new LibSVM();
+                            l.train(inputstr + path);
 
                             currentActivity.runOnUiThread(new Runnable() {
                                 public void run() {
