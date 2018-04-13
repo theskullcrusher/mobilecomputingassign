@@ -43,6 +43,7 @@ public class Tab2 extends Fragment {
             + "/Android/Data/CSE535_ASSIGNMENT3/";
     public static final String data_file = "training_data";
     public static final String model_file = "training_data.model";
+    private String accuracy = "";
     // Adopted from https://stackoverflow.com/questions/35481924/write-a-string-to-a-file
     public void writeDataToFile(String data) {
         final File file = new File(appFolderPath, data_file);
@@ -67,7 +68,6 @@ public class Tab2 extends Fragment {
         View rootView = inflater.inflate(R.layout.tab2, container, false);
         currentActivity = getActivity();
         run = (Button) rootView.findViewById(R.id.run1);
-        run.setVisibility(View.GONE);
         stop = (Button) rootView.findViewById(R.id.stop1);
         stop.setVisibility(View.GONE);
         tv = (TextView) rootView.findViewById(R.id.tv5);
@@ -81,14 +81,13 @@ public class Tab2 extends Fragment {
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 bt1.setClickable(false);
+                run.setClickable(false);
                 tv.setVisibility(View.GONE);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         // TODO Auto-generated method stub
-                        inputstr = inputPara.getText().toString().trim();
                         Db1 = new MyDatabase(currentActivity);
                         db_list = Db1.readData(tableName);
                         if (db_list.isEmpty()) {
@@ -127,38 +126,53 @@ public class Tab2 extends Fragment {
                             currentActivity.runOnUiThread(new Runnable() {
                                 public void run() {
                                     tv.setVisibility(View.VISIBLE);
-                                }
-                            });
-
-                            if(inputstr.equals(""))
-                                inputstr = "-s 1 -g 0.04 -v 5 -t 0 ";
-                            else
-                                inputstr = inputstr.trim() + " ";
-                            String path = appFolderPath + data_file;
-                            String modelpath = appFolderPath + model_file;
-                            Log.d(TAG, "Program Input SVM: "+path);
-//                            svm = new LibSVM();
-//                            svm.train(inputstr + path);
-//                            LibSVM l = new LibSVM();
-//                            l.train(inputstr + path);
-                            svm_train svm = new svm_train();
-                            String temp = inputstr + path + " " + modelpath;
-                            String[] array = temp.split(" ");
-                            try {
-                                svm.main(array);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                            currentActivity.runOnUiThread(new Runnable() {
-                                public void run() {
                                     bt1.setClickable(true);
-                                    String tmp = tv.getText().toString();
-                                    tmp += "\nSuccessfully run SVM with 5 fold cross-validation accuracy of ...";
-                                    tv.setText(tmp);
+                                    run.setClickable(true);
                                 }
                             });
                         }
+                    }
+                }).start();
+
+            }
+        });
+
+
+        run.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bt1.setClickable(false);
+                run.setClickable(false);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        inputstr = inputPara.getText().toString().trim();
+
+                        if(inputstr.equals(""))
+                            inputstr = "-s 1 -g 0.04 -v 5 -t 0 ";
+                        else
+                            inputstr = inputstr.trim() + " ";
+                        String path = appFolderPath + data_file;
+                        String modelpath = appFolderPath + model_file;
+                        Log.d(TAG, "Program Input SVM: "+path);
+                        svm_train svm = new svm_train();
+                        String temp = inputstr + path + " " + modelpath;
+                        String[] array = temp.split(" ");
+                        try {
+                            svm.main(array);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        currentActivity.runOnUiThread(new Runnable() {
+                            public void run() {
+                                bt1.setClickable(true);
+                                run.setClickable(true);
+                                String tmp = tv.getText().toString();
+                                tmp += "\nSuccessfully run SVM with 5 fold cross-validation accuracy of "+ accuracy + "...";
+                                tv.setText(tmp);
+                            }
+                        });
                     }
                 }).start();
 

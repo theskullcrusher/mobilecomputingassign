@@ -24,6 +24,14 @@
             android:padding="10dp"
             android:fadingEdgeLength="@dimen/fab_margin"
             >
+
+            <Button
+                android:id="@+id/bt1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@android:color/holo_orange_dark"
+                android:text="Reload Database" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -60,19 +68,11 @@
 
 
             <Button
-                android:id="@+id/bt1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@android:color/holo_green_light"
-                android:text="Reload Database and Run SVM" />
-
-
-            <Button
                 android:id="@+id/run1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="@android:color/holo_green_light"
+                android:backgroundTint="@android:color/holo_green_dark"
                 android:text="Run" />
 
             <Button
