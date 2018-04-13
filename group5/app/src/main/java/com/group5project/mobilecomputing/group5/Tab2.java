@@ -22,9 +22,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import libsvm.*;
-import umich.cse.yctung.androidlibsvm.LibSVM;
-import umich.cse.yctung.androidlibsvm.LibSVM.*;
 
 public class Tab2 extends Fragment {
 
@@ -42,11 +39,10 @@ public class Tab2 extends Fragment {
     private EditText inputPara;
     private TextView tv;
     private String inputstr = "";
-//    LibSVM svm;
     public static final String appFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath()
             + "/Android/Data/CSE535_ASSIGNMENT3/";
     public static final String data_file = "training_data";
-
+    public static final String model_file = "training_data.model";
     // Adopted from https://stackoverflow.com/questions/35481924/write-a-string-to-a-file
     public void writeDataToFile(String data) {
         final File file = new File(appFolderPath, data_file);
@@ -100,12 +96,7 @@ public class Tab2 extends Fragment {
                         } else {
 //                            Toast.makeText(currentActivity.getApplicationContext(), "Please wait 30sec for training set creation..." +
 //                                    "Creating training dataset \"training_data\"", Toast.LENGTH_LONG).show();
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            Log.d(TAG, "Comes to else part");
+                            Log.d(TAG, "Comes to else part: "+inputstr);
                             //Use inputstr parameters or default values if nothing is given to perform multiclass svm
                             String data = "";
                             ArrayList<String> class_labels = new ArrayList<String>();
@@ -140,16 +131,24 @@ public class Tab2 extends Fragment {
                             });
 
                             if(inputstr.equals(""))
-                                inputstr = "-s 0 -c 100 -g 0.1 -v 5 ";
+                                inputstr = "-s 1 -g 0.04 -v 5 -t 0 ";
                             else
                                 inputstr = inputstr.trim() + " ";
                             String path = appFolderPath + data_file;
+                            String modelpath = appFolderPath + model_file;
                             Log.d(TAG, "Program Input SVM: "+path);
 //                            svm = new LibSVM();
 //                            svm.train(inputstr + path);
-//                            jniSvmTrain(String options);
-                            LibSVM l = new LibSVM();
-                            l.train(inputstr + path);
+//                            LibSVM l = new LibSVM();
+//                            l.train(inputstr + path);
+                            svm_train svm = new svm_train();
+                            String temp = inputstr + path + " " + modelpath;
+                            String[] array = temp.split(" ");
+                            try {
+                                svm.main(array);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
 
                             currentActivity.runOnUiThread(new Runnable() {
                                 public void run() {

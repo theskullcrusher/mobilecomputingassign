@@ -29,6 +29,7 @@ public class MyDatabase extends SQLiteOpenHelper {
 
     MyDatabase(Context context) {
         super(context, DbName, null, 1);
+
         Log.d(TAG, "Creating Database");
     }
 

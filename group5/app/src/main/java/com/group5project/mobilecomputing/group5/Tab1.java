@@ -4,8 +4,12 @@ package com.group5project.mobilecomputing.group5;
  * Created by srinija on 3/31/18.
  */
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.os.CountDownTimer;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +27,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.content.Context;
+
 import java.lang.Object;
 import java.lang.String;
 //database headers
@@ -35,7 +40,7 @@ import static java.sql.DriverManager.println;
 
 public class Tab1 extends Fragment implements SensorEventListener {
 
-    private static final String TAG = Tab1.class.getCanonicalName() ;
+    private static final String TAG = Tab1.class.getCanonicalName();
     public int timer;
     private Button startTimerButton;
     private TextView timerText;
@@ -48,31 +53,33 @@ public class Tab1 extends Fragment implements SensorEventListener {
     private RadioGroup rg;
     private Boolean TimerFlag = false;
     String activity = "Activity";
-    private static int i=0;
-    private static int r=0;
+    private static int i = 0;
+    private static int r = 0;
     String activityName;
     int activityCount[] = new int[3];
     float[] xyz_values = new float[200];
     //sensor variables
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
-    private int PostedtoUiFlag =0;
-
+    private int PostedtoUiFlag = 0;
+    Activity currentActivity;
     private long lastUpdate = 0;
     MyDatabase Db1;
+    private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 8503;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab1, container, false);
-        startTimerButton = (Button)rootView.findViewById(R.id.startTimerButton);
+        startTimerButton = (Button) rootView.findViewById(R.id.startTimerButton);
         timerText = (TextView) rootView.findViewById(R.id.timerText);
-        walk_radio = (RadioButton)rootView.findViewById(R.id.walk_radio);
-        run_radio = (RadioButton)rootView.findViewById(R.id.run_radio);
-        jump_radio = (RadioButton)rootView.findViewById(R.id.jump_radio);
-        countText1 = (TextView)rootView.findViewById(R.id.countText1);
-        countText2 = (TextView)rootView.findViewById(R.id.countText2);
-        countText3 = (TextView)rootView.findViewById(R.id.countText3);
-        Db1 = new MyDatabase(getActivity());
+        walk_radio = (RadioButton) rootView.findViewById(R.id.walk_radio);
+        run_radio = (RadioButton) rootView.findViewById(R.id.run_radio);
+        jump_radio = (RadioButton) rootView.findViewById(R.id.jump_radio);
+        countText1 = (TextView) rootView.findViewById(R.id.countText1);
+        countText2 = (TextView) rootView.findViewById(R.id.countText2);
+        countText3 = (TextView) rootView.findViewById(R.id.countText3);
+        currentActivity = getActivity();
+        Db1 = new MyDatabase(getActivity().getApplicationContext());
         Db1.data();
         senSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -84,7 +91,7 @@ public class Tab1 extends Fragment implements SensorEventListener {
             public void run() {
                 int id1 = android.os.Process.myTid();
                 Log.d(TAG, "in onResume method " + Integer.toString(id1));
-                while (true){
+                while (true) {
                     ReadValues();
                 }
             }
@@ -99,7 +106,7 @@ public class Tab1 extends Fragment implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
-        Boolean activityChecked = walk_radio.isChecked()|| run_radio.isChecked()||jump_radio.isChecked();
+        Boolean activityChecked = walk_radio.isChecked() || run_radio.isChecked() || jump_radio.isChecked();
         if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
@@ -108,13 +115,13 @@ public class Tab1 extends Fragment implements SensorEventListener {
 
             /*get the data for every 0.1 second*/
 
-            if ((curTime - lastUpdate) > 100  && activityChecked && i< 149 ) {
-                    xyz_values[i] = x;
-                    i++;
-                    xyz_values[i]=y;
-                    i++;
-                    xyz_values[i]=z;
-                    i++;
+            if ((curTime - lastUpdate) > 100 && activityChecked && i < 149) {
+                xyz_values[i] = x;
+                i++;
+                xyz_values[i] = y;
+                i++;
+                xyz_values[i] = z;
+                i++;
                 int id = android.os.Process.myPid();
                 //Log.d(TAG, "on sensor changed " + Integer.toString(id));
                 lastUpdate = curTime;
@@ -124,6 +131,30 @@ public class Tab1 extends Fragment implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+
+    //permissions code from stackoverflow
+    private void storagePermissionCheck() {
+        if (ActivityCompat.checkSelfPermission(currentActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(currentActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+        }
+        if (ActivityCompat .checkSelfPermission(currentActivity.getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(currentActivity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case STORAGE_PERMISSIONS_REQUEST_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                } else
+                    currentActivity.finish();
+
+                return;
+            }
+        }
 
     }
 
@@ -145,8 +176,7 @@ public class Tab1 extends Fragment implements SensorEventListener {
                     });
                     Db1.AddData(xyz_values, activity);
                     i = 0;
-                }
-               else {
+                } else {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -155,55 +185,53 @@ public class Tab1 extends Fragment implements SensorEventListener {
                     });
                 }
             } else if (run_radio.isChecked()) {
-            activity = "running";
-            if (activityCount[1] > 0) {
-                activityCount[1]--;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
-                        countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
-                        countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
-                    }
-                });
-                Db1.AddData(xyz_values, activity);
-                i = 0;
-            } else {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        run_radio.setChecked(false);
-                    }
-                });
-            }
-        } else if (jump_radio.isChecked()) {
-            activity = "jumping";
-            if (activityCount[2] > 0) {
-                activityCount[2]--;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
-                        countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
-                        countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
-                    }
-                });
-                Db1.AddData(xyz_values, activity);
-                i = 0;
-            } else {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        jump_radio.setChecked(false);
-                    }
-                });
-               }
+                activity = "running";
+                if (activityCount[1] > 0) {
+                    activityCount[1]--;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
+                            countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
+                            countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
+                        }
+                    });
+                    Db1.AddData(xyz_values, activity);
+                    i = 0;
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            run_radio.setChecked(false);
+                        }
+                    });
+                }
+            } else if (jump_radio.isChecked()) {
+                activity = "jumping";
+                if (activityCount[2] > 0) {
+                    activityCount[2]--;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            countText1.setText("Remaining count for Walking: " + String.valueOf(activityCount[0]));
+                            countText2.setText("Remaining count for Running: " + String.valueOf(activityCount[1]));
+                            countText3.setText("Remaining count for Jumping: " + String.valueOf(activityCount[2]));
+                        }
+                    });
+                    Db1.AddData(xyz_values, activity);
+                    i = 0;
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            jump_radio.setChecked(false);
+                        }
+                    });
+                }
             }
         }
     }
 }
-
-
 
 
 //Original HomeActivity.java
