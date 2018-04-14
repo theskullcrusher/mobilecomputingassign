@@ -30,14 +30,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@android:color/holo_orange_dark"
-                android:text="Reload Database" />
+                android:text="Reload Entire Database" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/holo_red_dark"
                 android:textAlignment="center"
-                android:text="(Please be patient on clicking reload database. It takes 30 sec to preprocess)"
+                android:text="(Please be patient on clicking reload database. It takes 30+ sec to preprocess)"
                 />
 
         </LinearLayout>
@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/holo_blue_dark"
                 android:textAlignment="center"
-                android:text="Successfully reloaded database and done preprocessing input...\nNow running SVM Classifier...\n"
+                android:text="Successfully reloaded database and done preprocessing input...\nNow you can run SVM Classifier...\n"
                 />
 
         </LinearLayout>

@@ -91,6 +91,7 @@ public class Tab2 extends Fragment {
                         Db1 = new MyDatabase(currentActivity);
                         db_list = Db1.readData(tableName);
                         if (db_list.isEmpty()) {
+                            Log.e(TAG, "Empty readdata. This should not happen!");
 //                            Toast.makeText(currentActivity.getApplicationContext(), "No Input data found. Please record data in Tab 1 to perform classification on...", Toast.LENGTH_LONG).show();
                         } else {
 //                            Toast.makeText(currentActivity.getApplicationContext(), "Please wait 30sec for training set creation..." +
@@ -136,7 +137,6 @@ public class Tab2 extends Fragment {
 
             }
         });
-
 
         run.setOnClickListener(new View.OnClickListener() {
             @Override
