@@ -7,6 +7,7 @@ package com.group5project.mobilecomputing.group5;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,8 +23,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import static com.group5project.mobilecomputing.group5.svm_train.*;
+import java.util.concurrent.TimeUnit;
 
-public class Tab2 extends Fragment {
+
+public class Tab2 extends Fragment{
 
     private static final String TAG = Tab2.class.getCanonicalName();
     String activity = "Activity";
@@ -44,6 +48,8 @@ public class Tab2 extends Fragment {
     public static final String data_file = "training_data";
     public static final String model_file = "training_data.model";
     private String accuracy = "";
+    svm_train callbackregister;
+
     // Adopted from https://stackoverflow.com/questions/35481924/write-a-string-to-a-file
     public void writeDataToFile(String data) {
         final File file = new File(appFolderPath, data_file);
@@ -57,7 +63,6 @@ public class Tab2 extends Fragment {
         } catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
-
 
     }
 
@@ -76,7 +81,8 @@ public class Tab2 extends Fragment {
         inputPara = (EditText) rootView.findViewById(R.id.et1);
         final HashMap<Integer, String> hmap = new HashMap<Integer, String>();
         final HashMap<String, Integer> reverse_hmap = new HashMap<String, Integer>();
-
+        callbackregister = new svm_train();
+        callbackregister.registerCallback((GetAccuracy) getActivity());
 
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,20 +161,23 @@ public class Tab2 extends Fragment {
                         String path = appFolderPath + data_file;
                         String modelpath = appFolderPath + model_file;
                         Log.d(TAG, "Program Input SVM: "+path);
-                        svm_train svm = new svm_train();
                         String temp = inputstr + path + " " + modelpath;
                         String[] array = temp.split(" ");
                         try {
-                            svm.main(array);
+                            callbackregister.run(array);
+                            TimeUnit.SECONDS.sleep(1);
                         } catch (IOException e) {
                             e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
-
+                        accuracy = ((HomeActivity)currentActivity).getAccuracyString();
                         currentActivity.runOnUiThread(new Runnable() {
                             public void run() {
                                 bt1.setClickable(true);
                                 run.setClickable(true);
                                 String tmp = tv.getText().toString();
+                                tmp += "\nDefault input used: -s 1 -g 0.04 -v 5 -t 0 ";
                                 tmp += "\nSuccessfully run SVM with 5 fold cross-validation accuracy of "+ accuracy + "...";
                                 tv.setText(tmp);
                             }

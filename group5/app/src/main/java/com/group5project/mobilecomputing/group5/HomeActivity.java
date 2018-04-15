@@ -14,8 +14,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
-public class HomeActivity extends AppCompatActivity {
+import com.group5project.mobilecomputing.group5.svm_train.GetAccuracy;
+
+public class HomeActivity extends AppCompatActivity implements GetAccuracy {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -27,17 +30,37 @@ public class HomeActivity extends AppCompatActivity {
      */
     private static final String TAG = Tab1.class.getCanonicalName();
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    private AppCompatActivity currentActivity;
+    private String accuracy = "";
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
 
+    public void setAccuracyString(String result){
+        this.accuracy = result;
+    }
+    public String getAccuracyString(){
+        return accuracy;
+    }
+
+    @Override
+    public void getAccuracy(final String result) {
+        final String accuracy = result;
+        setAccuracyString(result);
+        Log.d(TAG, "Accuracy of five-fold crossvalidation is: "+result);
+        currentActivity.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(currentActivity, "Accuracy is "+accuracy, Toast.LENGTH_LONG).show();            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        currentActivity = this;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -63,21 +86,12 @@ public class HomeActivity extends AppCompatActivity {
         super.onResume();
     }
 
-
-    //@Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main2, menu);
-//        return true;
-//    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
@@ -85,7 +99,6 @@ public class HomeActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
     /**
      * A placeholder fragment containing a simple view.
      */

@@ -4,8 +4,14 @@ import libsvm.*;
 import java.io.*;
 import java.util.*;
 
-class svm_train {
-	private svm_parameter param;		// set by parse_command_line
+import javax.security.auth.callback.Callback;
+
+public class svm_train {
+    public interface GetAccuracy
+    {
+        public void getAccuracy (String result);
+    }
+    private svm_parameter param;		// set by parse_command_line
 	private svm_problem prob;		// set by read_problem
 	private svm_model model;
 	private String input_file_name;		// set by parse_command_line
@@ -13,6 +19,12 @@ class svm_train {
 	private String error_msg;
 	private int cross_validation;
 	private int nr_fold;
+
+	// credits to http://www.edumobile.org/android/how-to-implement-callback-method/ for tutorial on callbacks
+    GetAccuracy mListener;
+    void registerCallback(GetAccuracy listener){
+       mListener = listener;
+    }
 
 	private static svm_print_interface svm_print_null = new svm_print_interface()
 	{
@@ -87,11 +99,13 @@ class svm_train {
 			for(i=0;i<prob.l;i++)
 				if(target[i] == prob.y[i])
 					++total_correct;
-			System.out.print("Cross Validation Accuracy = "+100.0*total_correct/prob.l+"%\n");
+			String output_result = String.valueOf(100.0*total_correct/prob.l);
+			System.out.print("Cross Validation Accuracy = "+output_result+"%\n");
+            mListener.getAccuracy(output_result);
 		}
 	}
 	
-	private void run(String argv[]) throws IOException
+	public void run(String argv[]) throws IOException
 	{
 		parse_command_line(argv);
 		read_problem();

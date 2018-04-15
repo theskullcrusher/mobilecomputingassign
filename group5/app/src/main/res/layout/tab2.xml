@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/holo_red_dark"
                 android:textAlignment="center"
-                android:text="(Please be patient on clicking reload database. It takes 30+ sec to preprocess)"
+                android:text="(Please be patient on clicking reload database. It takes 40+ sec to preprocess)"
                 />
 
         </LinearLayout>
@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/holo_blue_dark"
                 android:textAlignment="center"
-                android:text="Successfully reloaded database and done preprocessing input...\nNow you can run SVM Classifier...\n"
+                android:text="Successfully reloaded database and done preprocessing input...\nNow you can run SVM Classifier...\nDefault input used: -s 1 -g 0.04 -v 5 -t 0\nSVM Type(-s): nu-SVC  Gamma(-g):0.04\nKfoldcrossvalidation(-v):5  Kernel Type(-t):Linear"
                 />
 
         </LinearLayout>
