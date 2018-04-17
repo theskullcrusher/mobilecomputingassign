@@ -27,6 +27,9 @@ import java.sql.Timestamp;
 public class MyDatabase extends SQLiteOpenHelper {
 
     public static final String DbName = "Group5db.db";
+    public static final String TrainingSet = "training_set";
+    public static final String TrainingData = "training_data";
+    public static final String TestingSet = "testing_set";
     public static final String DbPath = Environment.getExternalStorageDirectory().getAbsolutePath()
             + "/Android/Data/CSE535_ASSIGNMENT3/";
     public static final String TAG = MyDatabase.class.getCanonicalName();
@@ -67,12 +70,12 @@ public class MyDatabase extends SQLiteOpenHelper {
     }
 
     //Copy the database from assets
-    private void copyDataBase() throws IOException
+    private void copyDataBase(String fileName) throws IOException
     {
-        File dbFile = new File(DbPath + DbName);
+        File dbFile = new File(DbPath + fileName);
         dbFile.getParentFile().mkdirs();
-        InputStream mInput = mContext.getAssets().open(DbName);
-        String outFileName = DbPath + DbName;
+        InputStream mInput = mContext.getAssets().open(fileName);
+        String outFileName = DbPath + fileName;
         OutputStream mOutput = new FileOutputStream(outFileName);
         byte[] mBuffer = new byte[1024];
         int mLength;
@@ -110,8 +113,11 @@ public class MyDatabase extends SQLiteOpenHelper {
 //                }
             try
             {
-                //Copy the database from assests
-                copyDataBase();
+                //Copy the database from assets
+                copyDataBase(DbName);
+                copyDataBase(TrainingSet);
+                copyDataBase(TestingSet);
+                copyDataBase(TrainingData);
                 Log.e(TAG, "Default database copied to sdcard");
             }
             catch (IOException mIOException)
