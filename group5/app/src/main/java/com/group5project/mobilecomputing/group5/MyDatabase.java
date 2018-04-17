@@ -69,6 +69,8 @@ public class MyDatabase extends SQLiteOpenHelper {
     //Copy the database from assets
     private void copyDataBase() throws IOException
     {
+        File dbFile = new File(DbPath + DbName);
+        dbFile.getParentFile().mkdirs();
         InputStream mInput = mContext.getAssets().open(DbName);
         String outFileName = DbPath + DbName;
         OutputStream mOutput = new FileOutputStream(outFileName);
