@@ -47,7 +47,7 @@ public class Tab2 extends Fragment{
     private String inputstr = "";
     public static final String appFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath()
             + "/Android/Data/CSE535_ASSIGNMENT3/";
-    public static final String data_file = appFolderPath + "training_data";
+    public static final String data_file = "training_data";
     public static final String training_set = appFolderPath + "training_set";
     public static final String testing_set = appFolderPath + "testing_set";
     private String accuracy = "";
