@@ -177,6 +177,7 @@ public class Tab2 extends Fragment{
                             e.printStackTrace();
                         }
                         accuracy = ((HomeActivity)currentActivity).getAccuracyString();
+//                        System.out.println("accuracy="+accuracy);
                         currentActivity.runOnUiThread(new Runnable() {
                             public void run() {
                                 bt1.setClickable(true);

@@ -1,8 +1,12 @@
 package com.group5project.mobilecomputing.group5;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -32,6 +36,7 @@ public class HomeActivity extends AppCompatActivity implements GetAccuracy {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private AppCompatActivity currentActivity;
     private String accuracy = "";
+    private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 8503;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -44,6 +49,32 @@ public class HomeActivity extends AppCompatActivity implements GetAccuracy {
     public String getAccuracyString(){
         return accuracy;
     }
+
+    //permissions code from stackoverflow
+    private void storagePermissionCheck() {
+        if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(HomeActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+        }
+        if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(HomeActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case STORAGE_PERMISSIONS_REQUEST_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                }
+                else
+                    HomeActivity.this.finish();
+
+                return;
+            }
+        }
+
+    }
+
 
     @Override
     public void getAccuracy(final String result) {
@@ -59,6 +90,7 @@ public class HomeActivity extends AppCompatActivity implements GetAccuracy {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        storagePermissionCheck();
         setContentView(R.layout.activity_home);
         currentActivity = this;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

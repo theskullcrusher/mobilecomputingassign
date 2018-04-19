@@ -54,9 +54,9 @@ public class Tab3 extends Fragment{
                 "<p id=\"print1\"></p>\n" +
                 "<p id=\"print2\"></p>\n"+
                 "<div id=\"boxdiv\">\n" +
-                "\t<input type=\"checkbox\" value=1 onclick=senddata() name=\"activity\">Walking\n" +
-                "\t<input type=\"checkbox\" value=2 onclick=senddata() name=\"activity\">Running\n" +
-                "\t<input type=\"checkbox\" value=4 onclick=senddata() name=\"activity\">Jumping<br> \n" +
+                "\t<input type=\"checkbox\" value=1 onclick=senddata() name=\"activity\" style=\"width:25px;height:25px\"><b>Walking</b>\n" +
+                "\t<input type=\"checkbox\" value=2 onclick=senddata() name=\"activity\" style=\"width:25px;height:25px\"><b>Running</b>\n" +
+                "\t<input type=\"checkbox\" value=4 onclick=senddata() name=\"activity\" style=\"width:25px;height:25px\"><b>Jumping</b><br>\n" +
                 "</div>\n" +
                 "<div id=\"graphdiv\" style=\"width:auto; height:auto\"></div>\n" +
                 "\n" +
